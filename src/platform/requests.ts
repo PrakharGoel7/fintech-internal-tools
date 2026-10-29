@@ -15,8 +15,9 @@ export interface AppRequestInput {
 }
 
 /** The prompt handed to Devin. It deliberately points at the repo skill so behaviour lives in version control. */
-export function buildDevinPrompt(req: AppRequestInput, requester: User, repo: string) {
-  return `Use the build-internal-app skill in ${repo} (.agents/skills/build-internal-app/SKILL.md) to handle this internal app request.
+export function buildDevinPrompt(req: AppRequestInput, requester: User, repo: string, baseBranch = process.env.APP_BASE_BRANCH) {
+  const branch = baseBranch ? ` on branch ${baseBranch} (base your work and PR on it)` : "";
+  return `Use the build-internal-app skill in ${repo}${branch} (.agents/skills/build-internal-app/SKILL.md) to handle this internal app request.
 
 Requested by: ${requester.name} (${requester.title})
 Title: ${req.title}
