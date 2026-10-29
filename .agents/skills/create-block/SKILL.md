@@ -16,6 +16,7 @@ description: Add a new reusable L3 block to the catalog. Use only when GAPS.md s
    - all mutations via `ActionButton` / server actions → `runAction` (never write directly)
    - render PII with `PiiValue`
    - stay domain-agnostic: no source/field names, thresholds or status values in the component. Anything app-specific is a config field (e.g. `badges: [{ when, label }]`, not `riskField` + a hard-coded 70)
+   - style with the shared classes in `src/app/globals.css` (`card`, `btn-*`, `input`, `badge` + `TONE_CLS`, `table-head`, `eyebrow`, `brand-*`) rather than raw palette classes
 5. Register in `src/blocks/manifests.ts` and `src/blocks/registry.ts`.
 6. Migrate the app-local implementations listed in GAPS.md to the new block; mark those rows resolved.
 7. `npm run catalog && npm run graph && npm run check && npm run build`, then `npm run graph -- --diff origin/main` (version bump rules: AGENTS.md "Module versions"). Add a test if the block has logic beyond rendering.

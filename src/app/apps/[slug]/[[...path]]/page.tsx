@@ -36,12 +36,12 @@ export default async function AppPage({ params, searchParams }: { params: Promis
       <div className="mb-5 flex flex-wrap items-center gap-4">
         <AppIcon app={app} size="lg" />
         <div>
-          <h1 className="text-xl font-semibold">{app.name}</h1>
-          <p className="text-xs text-slate-500">config: <code className="font-mono">src/apps/{app.slug}/app.ts</code></p>
+          <h1 className="text-xl font-semibold tracking-tight">{app.name}</h1>
+          <p className="mt-0.5 text-xs text-slate-500">config <code className="chip">src/apps/{app.slug}/app.ts</code></p>
         </div>
-        <nav className="ml-auto flex gap-1 rounded-lg border border-slate-200 bg-white p-1 text-sm">
+        <nav className="ml-auto flex gap-1 rounded-lg bg-slate-200/60 p-1 text-sm font-medium">
           {app.pages.filter((p) => p.nav && !p.path.includes(":")).map((p) => (
-            <Link key={p.id} href={`${basePath}${p.path ? "/" + p.path : ""}`} className={`rounded-md px-3 py-1 ${p.id === m.page.id ? "bg-indigo-600 text-white" : "text-slate-600 hover:bg-slate-100"}`}>{p.title}</Link>
+            <Link key={p.id} href={`${basePath}${p.path ? "/" + p.path : ""}`} className={`rounded-md px-3 py-1 transition-colors ${p.id === m.page.id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}>{p.title}</Link>
           ))}
         </nav>
       </div>

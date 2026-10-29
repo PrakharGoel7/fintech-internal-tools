@@ -20,9 +20,9 @@ export function RequestForm() {
   const [sens, setSens] = useState<string[]>([]);
   const [prompt, setPrompt] = useState<string | null>(null);
   const router = useRouter();
-  const cls = "mt-1 block w-full rounded-md border border-slate-300 px-2.5 py-1.5 text-sm";
+  const cls = "input mt-1 block w-full font-normal";
   return (
-    <form className="space-y-3 rounded-xl border border-slate-200 bg-white p-5 shadow-sm" onSubmit={async (e) => {
+    <form className="card space-y-3 p-5" onSubmit={async (e) => {
       e.preventDefault();
       const r = await submitAppRequestAction({ title: v.title ?? "", team: v.team ?? "", users: v.users ?? "", problem: v.problem ?? "", data: v.data ?? "", actions: v.actions ?? "", approvals: v.approvals ?? "", sensitive: sens, urgency: v.urgency });
       toast(r.message, r.ok ? "success" : "error");
@@ -37,14 +37,14 @@ export function RequestForm() {
       ))}
       <fieldset className="text-sm"><legend className="font-medium text-slate-700">Sensitive data / risk</legend>
         <div className="mt-1 flex flex-wrap gap-3">{SENSITIVE.map((s) => (
-          <label key={s} className="flex items-center gap-1.5 text-slate-600"><input type="checkbox" checked={sens.includes(s)} onChange={(e) => setSens(e.target.checked ? [...sens, s] : sens.filter((x) => x !== s))} />{s}</label>
+          <label key={s} className="flex items-center gap-1.5 text-slate-600"><input type="checkbox" className="accent-brand-600" checked={sens.includes(s)} onChange={(e) => setSens(e.target.checked ? [...sens, s] : sens.filter((x) => x !== s))} />{s}</label>
         ))}</div>
       </fieldset>
       <label className="block text-sm font-medium text-slate-700">Urgency
         <select className={cls} value={v.urgency} onChange={(e) => setV({ ...v, urgency: e.target.value })}>{["this week", "this month", "this quarter"].map((o) => <option key={o}>{o}</option>)}</select>
       </label>
-      <button className="rounded-md bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700">Submit to Devin</button>
-      {prompt && <div><div className="mt-3 text-xs font-semibold text-slate-600">Prompt sent to Devin</div><pre className="mt-1 whitespace-pre-wrap rounded bg-slate-900 p-3 text-xs text-slate-100">{prompt}</pre></div>}
+      <button className="btn btn-primary px-4 py-2 text-sm">Submit to Devin</button>
+      {prompt && <div><div className="mt-3 text-xs font-semibold text-slate-600">Prompt sent to Devin</div><pre className="mt-1 whitespace-pre-wrap rounded-lg bg-slate-900 p-3 text-xs text-slate-100">{prompt}</pre></div>}
     </form>
   );
 }

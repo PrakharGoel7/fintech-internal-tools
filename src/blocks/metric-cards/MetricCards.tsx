@@ -6,6 +6,7 @@ import { formatPlain } from "../_shared/format";
 import { aggregate } from "../_shared/aggregate";
 
 const TONE = { neutral: "text-slate-900", good: "text-emerald-600", warn: "text-amber-600", bad: "text-rose-600" };
+const DOT = { neutral: "bg-slate-300", good: "bg-emerald-500", warn: "bg-amber-500", bad: "bg-rose-500" };
 
 export function MetricCards({ config }: BlockProps<z.infer<typeof configSchema>>) {
   const source = getSource(config.source);
@@ -14,9 +15,9 @@ export function MetricCards({ config }: BlockProps<z.infer<typeof configSchema>>
       {config.metrics.map((m) => {
         const v = aggregate(source.list({ where: m.where }), m.agg, m.field);
         return (
-          <div key={m.label} className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="text-xs font-medium uppercase tracking-wide text-slate-500">{m.label}</div>
-            <div className={`mt-1 text-2xl font-semibold ${TONE[m.tone]}`}>{formatPlain(v, m.format)}</div>
+          <div key={m.label} className="card p-4">
+            <div className="eyebrow flex items-center gap-1.5"><span className={`h-1.5 w-1.5 rounded-full ${DOT[m.tone]}`} />{m.label}</div>
+            <div className={`mt-1.5 text-2xl font-semibold tracking-tight tabular-nums ${TONE[m.tone]}`}>{formatPlain(v, m.format)}</div>
           </div>
         );
       })}

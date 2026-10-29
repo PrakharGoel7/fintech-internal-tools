@@ -1,7 +1,14 @@
 "use client";
 import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 
-const COLORS = ["#4f46e5", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"];
+/** Series palette; first colour is brand-600 from globals.css. */
+const COLORS = ["#2552eb", "#38bdf8", "#14b8a6", "#f59e0b", "#f43f5e", "#a78bfa", "#94a3b8"];
+const AXIS = { fontSize: 11, tick: { fill: "#64748b" }, tickLine: false, axisLine: false } as const;
+const TOOLTIP = {
+  contentStyle: { borderRadius: 10, border: "1px solid #e2e8f0", boxShadow: "0 8px 24px -8px rgb(15 23 42 / 0.2)", fontSize: 12, padding: "6px 10px" },
+  labelStyle: { color: "#0f172a", fontWeight: 600 },
+  cursor: { fill: "#f1f5f9" },
+};
 
 export function ChartView({ kind, data, currency }: { kind: "bar" | "line" | "pie"; data: { name: string; value: number }[]; currency: boolean }) {
   const fmt = (v: number) => (currency ? `$${v.toLocaleString()}` : v.toLocaleString());
@@ -10,27 +17,27 @@ export function ChartView({ kind, data, currency }: { kind: "bar" | "line" | "pi
       <ResponsiveContainer width="100%" height="100%">
         {kind === "pie" ? (
           <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" outerRadius={80} isAnimationActive={false}>
+            <Pie data={data} dataKey="value" nameKey="name" innerRadius={48} outerRadius={80} paddingAngle={2} stroke="#fff" strokeWidth={2} isAnimationActive={false}>
               {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
             </Pie>
-            <Tooltip formatter={(v) => fmt(Number(v))} />
-            <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} formatter={(v) => String(v).replace(/_/g, " ")} />
+            <Tooltip formatter={(v) => fmt(Number(v))} {...TOOLTIP} />
+            <Legend iconType="circle" iconSize={8} wrapperStyle={{ fontSize: 12, color: "#475569" }} formatter={(v) => <span className="text-slate-600">{String(v).replace(/_/g, " ")}</span>} />
           </PieChart>
         ) : kind === "line" ? (
           <LineChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="name" fontSize={11} tickFormatter={(v: string) => v.slice(5)} />
-            <YAxis fontSize={11} tickFormatter={fmt} width={60} />
-            <Tooltip formatter={(v) => fmt(Number(v))} />
-            <Line type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={2} dot={false} isAnimationActive={false} />
+            <CartesianGrid stroke="#eef2f6" vertical={false} />
+            <XAxis dataKey="name" {...AXIS} tickFormatter={(v: string) => v.slice(5)} />
+            <YAxis {...AXIS} tickFormatter={fmt} width={60} />
+            <Tooltip formatter={(v) => fmt(Number(v))} {...TOOLTIP} cursor={{ stroke: "#cbd5e1" }} />
+            <Line type="monotone" dataKey="value" stroke={COLORS[0]} strokeWidth={2.25} dot={false} activeDot={{ r: 4, strokeWidth: 0 }} isAnimationActive={false} />
           </LineChart>
         ) : (
           <BarChart data={data}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
-            <XAxis dataKey="name" fontSize={11} tickFormatter={(v: string) => v.replace(/_/g, " ")} />
-            <YAxis fontSize={11} tickFormatter={fmt} width={60} />
-            <Tooltip formatter={(v) => fmt(Number(v))} />
-            <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            <CartesianGrid stroke="#eef2f6" vertical={false} />
+            <XAxis dataKey="name" {...AXIS} tickFormatter={(v: string) => v.replace(/_/g, " ")} />
+            <YAxis {...AXIS} tickFormatter={fmt} width={60} />
+            <Tooltip formatter={(v) => fmt(Number(v))} {...TOOLTIP} />
+            <Bar dataKey="value" fill={COLORS[0]} radius={[6, 6, 0, 0]} maxBarSize={48} isAnimationActive={false} />
           </BarChart>
         )}
       </ResponsiveContainer>

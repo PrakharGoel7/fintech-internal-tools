@@ -18,10 +18,10 @@ export function Toaster() {
     window.addEventListener("app-toast", h);
     return () => window.removeEventListener("app-toast", h);
   }, []);
-  const color = { success: "bg-emerald-600", error: "bg-rose-600", info: "bg-slate-800" };
+  const color = { success: "bg-emerald-600", error: "bg-rose-600", info: "bg-slate-900" };
   return (
     <div className="fixed bottom-4 right-4 z-[60] flex flex-col gap-2">
-      {items.map((i) => <div key={i.id} className={`${color[i.kind]} max-w-sm rounded-lg px-4 py-2.5 text-sm text-white shadow-lg`}>{i.message}</div>)}
+      {items.map((i) => <div key={i.id} className={`${color[i.kind]} max-w-sm rounded-xl px-4 py-2.5 text-sm font-medium text-white shadow-pop ring-1 ring-white/10`}>{i.message}</div>)}
     </div>
   );
 }

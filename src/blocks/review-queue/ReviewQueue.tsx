@@ -28,12 +28,12 @@ export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof co
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(280px,360px)_1fr]">
-      <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+      <div className="card overflow-hidden">
         <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
-          <h3 className="text-sm font-semibold text-slate-800">{title ?? "Queue"} <span className="font-normal text-slate-400">{items.length}</span></h3>
-          <div className="flex rounded-md border border-slate-200 text-xs">
-            <Link href={href({ mine: "", item: "" })} className={`px-2 py-1 ${!mine ? "bg-slate-100 font-medium" : ""}`}>All</Link>
-            <Link href={href({ mine: "1", item: "" })} className={`px-2 py-1 ${mine ? "bg-slate-100 font-medium" : ""}`}>Mine</Link>
+          <h3 className="card-title">{title ?? "Queue"} <span className="ml-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 tabular-nums">{items.length}</span></h3>
+          <div className="flex rounded-lg bg-slate-100 p-0.5 text-xs font-medium">
+            <Link href={href({ mine: "", item: "" })} className={`rounded-md px-2.5 py-1 ${!mine ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}>All</Link>
+            <Link href={href({ mine: "1", item: "" })} className={`rounded-md px-2.5 py-1 ${mine ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}>Mine</Link>
           </div>
         </div>
         <ul className="max-h-[640px] divide-y divide-slate-100 overflow-y-auto">
@@ -43,15 +43,15 @@ export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof co
             const badges = config.badges.filter((b) => matches(b.when, r));
             return (
               <li key={id}>
-                <Link href={href({ item: id })} className={`block px-4 py-2.5 hover:bg-slate-50 ${id === selectedId ? "bg-indigo-50/70" : ""}`}>
+                <Link href={href({ item: id })} className={`block px-4 py-2.5 transition-colors ${id === selectedId ? "bg-brand-50/70 shadow-[inset_3px_0_0_var(--color-brand-600)]" : "hover:bg-slate-50"}`}>
                   <div className="flex items-center justify-between gap-2">
-                    <span className="font-mono text-xs text-slate-500">{id}</span>
+                    <span className="font-mono text-xs font-medium text-slate-500">{id}</span>
                     <div className="flex gap-1">
-                      {badges.map((b) => <span key={b.label} className={`rounded-full px-1.5 text-[10px] font-semibold uppercase ${TONE_CLS[b.tone]}`}>{b.label}</span>)}
-                      {sla && <span className={`rounded-full px-1.5 text-[10px] font-medium ${sla.cls}`}>{sla.label}</span>}
+                      {badges.map((b) => <span key={b.label} className={`badge px-1.5 py-0 text-[10px] font-semibold uppercase tracking-wide ${TONE_CLS[b.tone]}`}>{b.label}</span>)}
+                      {sla && <span className={`badge px-1.5 py-0 text-[10px] tabular-nums ${sla.cls}`}>{sla.label}</span>}
                     </div>
                   </div>
-                  <div className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-slate-700">
+                  <div className="mt-0.5 flex flex-wrap gap-x-3 text-sm font-medium text-slate-800">
                     {summary.map((c) => <span key={c.field}><FormattedValue value={r[c.field]} format={c.format} tones={c.tones} /></span>)}
                   </div>
                   <div className="mt-0.5 text-[11px] text-slate-400">{r[config.assigneeField] ? `Assigned to ${r[config.assigneeField]}` : "Unassigned"}</div>
@@ -59,18 +59,18 @@ export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof co
               </li>
             );
           })}
-          {items.length === 0 && <li className="px-4 py-10 text-center text-sm text-slate-400">Queue is empty 🎉</li>}
+          {items.length === 0 && <li className="px-4 py-10 text-center text-sm text-slate-400">Queue is empty</li>}
         </ul>
       </div>
 
       <div className="space-y-4">
         {selected ? (
           <>
-            <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+            <div className="card p-5">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                  <h3 className="text-lg font-semibold text-slate-900">{String(selected[source.def.titleField])}</h3>
-                  <p className="mt-0.5 flex items-center gap-2 font-mono text-xs text-slate-500">
+                  <h3 className="text-lg font-semibold tracking-tight text-slate-900">{String(selected[source.def.titleField])}</h3>
+                  <p className="mt-1 flex items-center gap-2 font-mono text-xs text-slate-500">
                     {selectedId} <StatusBadge value={selected[config.statusField]} tones={source.def.fields[config.statusField]?.tones} />
                     {config.sla && config.sla.mode === "elapsed" && <span className="font-sans">submitted {relative(String(selected[config.sla.field]))}</span>}
                     {config.sla && config.sla.mode === "deadline" && <span className="font-sans">due {formatPlain(selected[config.sla.field], "datetime")} ({slaState(String(selected[config.sla.field]), config.sla).label})</span>}
@@ -88,7 +88,7 @@ export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof co
               {config.history && <AuditTimeline config={{ scope: "record", source: config.source, idParam: "item", limit: 20 }} ctx={{ ...ctx, params: { ...ctx.params, item: selectedId! } }} title="Case history" />}
             </div>
           </>
-        ) : <div className="rounded-xl border border-dashed border-slate-300 p-10 text-center text-sm text-slate-400">Select an item</div>}
+        ) : <div className="rounded-xl border border-dashed border-slate-300 bg-white/50 p-10 text-center text-sm text-slate-400">Select an item</div>}
       </div>
     </div>
   );

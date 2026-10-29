@@ -16,8 +16,8 @@ export function DecideButtons({ approvalId }: { approvalId: string }) {
   };
   return (
     <div className="flex gap-2">
-      <button disabled={busy} onClick={() => go("reject")} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm">Reject</button>
-      <button disabled={busy} onClick={() => go("approve")} className="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700">Approve &amp; execute</button>
+      <button disabled={busy} onClick={() => go("reject")} className="btn btn-sm btn-secondary">Reject</button>
+      <button disabled={busy} onClick={() => go("approve")} className="btn btn-sm btn-success">Approve &amp; execute</button>
     </div>
   );
 }

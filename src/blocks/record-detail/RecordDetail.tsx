@@ -16,8 +16,8 @@ export function FieldList({ ctx, source, record, cols }: { ctx: BlockContext; so
     <dl className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2">
       {cols.map((c) => (
         <div key={c.field}>
-          <dt className="text-xs font-medium uppercase tracking-wide text-slate-500">{c.label}</dt>
-          <dd className="mt-0.5 text-sm text-slate-800">
+          <dt className="eyebrow">{c.label}</dt>
+          <dd className="mt-1 text-sm text-slate-900">
             {c.pii
               ? <PiiValue masked={String(record[c.field] ?? "")} canReveal={canReveal} appSlug={ctx.app.slug} source={source} recordId={String(record[pk])} field={c.field} />
               : <FormattedValue value={record[c.field]} format={c.format} tones={c.tones} />}
@@ -32,16 +32,16 @@ export function RecordDetail({ config, ctx, title }: BlockProps<z.infer<typeof c
   const source = getSource(config.source);
   const id = ctx.params[config.idParam];
   const record = id ? source.get(id) : null;
-  if (!record) return <div className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-500">Record not found.</div>;
+  if (!record) return <div className="card p-6 text-sm text-slate-500">Record not found.</div>;
   const cols = resolveColumns(config.fields, source.def);
   const metas = config.actions.map((a) => actionMeta(ctx, a, record)).filter((m) => m !== null);
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-      {config.backLink !== undefined && <Link href={`${ctx.basePath}/${config.backLink}`} className="text-xs text-indigo-600 hover:underline">← Back</Link>}
+    <div className="card p-5">
+      {config.backLink !== undefined && <Link href={`${ctx.basePath}/${config.backLink}`} className="link text-xs">← Back</Link>}
       <div className="mt-1 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900">{title ?? String(record[source.def.titleField])}</h3>
-          <p className="font-mono text-xs text-slate-500">{source.def.label} · {id}</p>
+          <h3 className="text-lg font-semibold tracking-tight text-slate-900">{title ?? String(record[source.def.titleField])}</h3>
+          <p className="mt-1 text-xs text-slate-500">{source.def.label} · <span className="chip">{id}</span></p>
         </div>
         <div className="flex gap-2">{metas.map((m) => <ActionButton key={m.id} appSlug={ctx.app.slug} meta={m} recordId={id} />)}</div>
       </div>
