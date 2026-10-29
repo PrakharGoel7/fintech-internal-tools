@@ -46,7 +46,7 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
       </button>
       {open && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4 backdrop-blur-sm" onClick={() => !busy && setOpen(false)}>
-          <div className="w-full max-w-md rounded-2xl bg-white p-5 text-left shadow-pop ring-1 ring-slate-900/5" onClick={(e) => e.stopPropagation()}>
+          <div className="w-full max-w-md rounded-2xl bg-white p-5 text-left whitespace-normal shadow-pop ring-1 ring-slate-900/5" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-base font-semibold text-slate-900">{meta.label}</h3>
             {recordId && <p className="mt-1"><span className="chip">{recordId}</span></p>}
             {meta.approvalRule && (
