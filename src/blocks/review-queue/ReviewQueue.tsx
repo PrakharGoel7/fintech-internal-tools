@@ -3,7 +3,8 @@ import type { z } from "zod";
 import { getSource } from "@/connectors";
 import type { BlockProps } from "../types";
 import type { configSchema } from "./manifest";
-import { resolveColumns, FormattedValue, StatusBadge, relative, formatPlain } from "../_shared/format";
+import { resolveColumns, FormattedValue, StatusBadge, TONE_CLS, relative, formatPlain } from "../_shared/format";
+import { matches } from "@/platform";
 import { slaState } from "./sla";
 import { actionMeta } from "../_shared/actions";
 import { ActionButton } from "../_shared/ActionButton";
@@ -39,19 +40,19 @@ export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof co
           {items.map((r) => {
             const id = String(r[source.def.pk]);
             const sla = config.sla ? slaState(String(r[config.sla.field]), config.sla) : null;
-            const prio = config.priorityField ? Number(r[config.priorityField]) : null;
+            const badges = config.badges.filter((b) => matches(b.when, r));
             return (
               <li key={id}>
                 <Link href={href({ item: id })} className={`block px-4 py-2.5 hover:bg-slate-50 ${id === selectedId ? "bg-indigo-50/70" : ""}`}>
                   <div className="flex items-center justify-between gap-2">
                     <span className="font-mono text-xs text-slate-500">{id}</span>
                     <div className="flex gap-1">
-                      {prio !== null && prio > 70 && <span className="rounded-full bg-rose-100 px-1.5 text-[10px] font-semibold text-rose-700">HIGH RISK</span>}
+                      {badges.map((b) => <span key={b.label} className={`rounded-full px-1.5 text-[10px] font-semibold uppercase ${TONE_CLS[b.tone]}`}>{b.label}</span>)}
                       {sla && <span className={`rounded-full px-1.5 text-[10px] font-medium ${sla.cls}`}>{sla.label}</span>}
                     </div>
                   </div>
                   <div className="mt-0.5 flex flex-wrap gap-x-3 text-sm text-slate-700">
-                    {summary.map((c) => <span key={c.field}><FormattedValue value={r[c.field]} format={c.format} /></span>)}
+                    {summary.map((c) => <span key={c.field}><FormattedValue value={r[c.field]} format={c.format} tones={c.tones} /></span>)}
                   </div>
                   <div className="mt-0.5 text-[11px] text-slate-400">{r[config.assigneeField] ? `Assigned to ${r[config.assigneeField]}` : "Unassigned"}</div>
                 </Link>
@@ -70,7 +71,7 @@ export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof co
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900">{String(selected[source.def.titleField])}</h3>
                   <p className="mt-0.5 flex items-center gap-2 font-mono text-xs text-slate-500">
-                    {selectedId} <StatusBadge value={selected.status} />
+                    {selectedId} <StatusBadge value={selected[config.statusField]} tones={source.def.fields[config.statusField]?.tones} />
                     {config.sla && config.sla.mode === "elapsed" && <span className="font-sans">submitted {relative(String(selected[config.sla.field]))}</span>}
                     {config.sla && config.sla.mode === "deadline" && <span className="font-sans">due {formatPlain(selected[config.sla.field], "datetime")} ({slaState(String(selected[config.sla.field]), config.sla).label})</span>}
                   </p>

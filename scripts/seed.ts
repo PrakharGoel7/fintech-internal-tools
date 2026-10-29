@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { getDb } from "@/platform/db";
+import "@/connectors";
 import { audit } from "@/platform/audit";
 
 /** Deterministic synthetic data. Never seed real customer data. */

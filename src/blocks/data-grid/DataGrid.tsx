@@ -52,7 +52,7 @@ export function DataGrid({ config, ctx, title }: BlockProps<z.infer<typeof confi
                     <td key={c.field} className="whitespace-nowrap px-4 py-2 text-slate-700">
                       {i === 0 && config.rowLink ? (
                         <Link className="font-medium text-indigo-600 hover:underline" href={`${ctx.basePath}/${config.rowLink.replace(":id", encodeURIComponent(id))}`}>{String(r[c.field])}</Link>
-                      ) : c.pii ? <span className="font-mono text-slate-500">{String(r[c.field])}</span> : <FormattedValue value={r[c.field]} format={c.format} />}
+                      ) : c.pii ? <span className="font-mono text-slate-500">{String(r[c.field])}</span> : <FormattedValue value={r[c.field]} format={c.format} tones={c.tones} />}
                     </td>
                   ))}
                   {config.rowActions.length > 0 && (

@@ -5,11 +5,12 @@ import type { BlockProps } from "../types";
 import type { configSchema } from "./manifest";
 import { actionMeta } from "../_shared/actions";
 import { ActionButton } from "../_shared/ActionButton";
-import { formatPlain } from "../_shared/format";
+import { resolveColumns, FormattedValue } from "../_shared/format";
 
 export function ToggleMatrix({ config, ctx, title }: BlockProps<z.infer<typeof configSchema>>) {
   const source = getSource(config.source);
   const rows = source.list();
+  const extra = resolveColumns(config.extraFields, source.def);
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-800">{title ?? `${source.def.label}s`}</div>
@@ -32,7 +33,7 @@ export function ToggleMatrix({ config, ctx, title }: BlockProps<z.infer<typeof c
                     : <span className="font-mono text-sm font-medium">{String(r[config.labelField])}</span>}
                   {config.descriptionField && <div className="text-xs text-slate-500">{String(r[config.descriptionField])}</div>}
                 </td>
-                {config.extraFields.map((f) => <td key={f} className="px-4 py-2.5 text-slate-600">{formatPlain(r[f], source.def.fields[f]?.type === "number" ? "number" : "text")}</td>)}
+                {extra.map((c) => <td key={c.field} className="px-4 py-2.5 text-slate-600"><FormattedValue value={r[c.field]} format={c.format} tones={c.tones} /></td>)}
                 {config.columns.map((c) => {
                   const on = Number(r[c.field]) === 1;
                   const m = actionMeta(ctx, c.action, r);

@@ -1,7 +1,7 @@
-import type { SourceDef } from "@/connectors";
+import type { SourceDef, Tone } from "@/connectors";
 import type { Column, Format } from "./schema";
 
-export interface ResolvedColumn { field: string; label: string; format: Format; pii: boolean }
+export interface ResolvedColumn { field: string; label: string; format: Format; pii: boolean; tones?: Record<string, Tone> }
 
 export function resolveColumns(cols: Column[], def: SourceDef): ResolvedColumn[] {
   return cols.map((c) => {
@@ -9,24 +9,29 @@ export function resolveColumns(cols: Column[], def: SourceDef): ResolvedColumn[]
     const f = def.fields[field];
     const label = (typeof c !== "string" && c.label) || f?.label || field;
     const format = (typeof c !== "string" && c.format) || (f?.type as Format) || "text";
-    return { field, label, format, pii: def.piiFields.includes(field) };
+    return { field, label, format, pii: def.piiFields.includes(field), tones: f?.tones };
   });
 }
 
-const STATUS_COLORS: Record<string, string> = {
-  pending: "bg-amber-100 text-amber-800", requested: "bg-amber-100 text-amber-800",
-  in_review: "bg-blue-100 text-blue-800", needs_review: "bg-amber-100 text-amber-800",
-  approved: "bg-emerald-100 text-emerald-800", issued: "bg-emerald-100 text-emerald-800", clear: "bg-emerald-100 text-emerald-800",
-  rejected: "bg-rose-100 text-rose-800", denied: "bg-rose-100 text-rose-800", watchlist_hit: "bg-rose-100 text-rose-800", failed: "bg-rose-100 text-rose-800",
-  escalated: "bg-purple-100 text-purple-800", pending_approval: "bg-orange-100 text-orange-800",
-  needs_response: "bg-amber-100 text-amber-800", under_review: "bg-blue-100 text-blue-800",
-  won: "bg-emerald-100 text-emerald-800", lost: "bg-rose-100 text-rose-800", accepted: "bg-slate-200 text-slate-700",
+export const TONE_CLS: Record<Tone, string> = {
+  neutral: "bg-slate-100 text-slate-700", info: "bg-blue-100 text-blue-800", good: "bg-emerald-100 text-emerald-800",
+  warn: "bg-amber-100 text-amber-800", bad: "bg-rose-100 text-rose-800", accent: "bg-purple-100 text-purple-800",
 };
 
-export function StatusBadge({ value }: { value: unknown }) {
+/** Generic workflow vocabulary only. Domain-specific values belong in the source's `fields[x].tones`. */
+const DEFAULT_TONES: Record<string, Tone> = {
+  pending: "warn", requested: "warn", open: "warn", pending_approval: "warn",
+  in_review: "info", in_progress: "info",
+  approved: "good", completed: "good", resolved: "good", active: "good",
+  rejected: "bad", failed: "bad", cancelled: "bad",
+  escalated: "accent", closed: "neutral",
+};
+
+export function StatusBadge({ value, tones }: { value: unknown; tones?: Record<string, Tone> }) {
   const v = String(value ?? "");
   if (!v) return <span className="text-slate-400">—</span>;
-  return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[v] ?? "bg-slate-100 text-slate-700"}`}>{v.replace(/_/g, " ")}</span>;
+  const tone = tones?.[v] ?? DEFAULT_TONES[v] ?? "neutral";
+  return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${TONE_CLS[tone]}`}>{v.replace(/_/g, " ")}</span>;
 }
 
 export function relative(iso: string) {
@@ -51,8 +56,8 @@ export function formatPlain(value: unknown, format: Format): string {
   }
 }
 
-export function FormattedValue({ value, format }: { value: unknown; format: Format }) {
-  if (format === "status") return <StatusBadge value={value} />;
+export function FormattedValue({ value, format, tones }: { value: unknown; format: Format; tones?: Record<string, Tone> }) {
+  if (format === "status") return <StatusBadge value={value} tones={tones} />;
   if (format === "boolean") {
     const on = Number(value) === 1;
     return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${on ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"}`}>{on ? "ON" : "OFF"}</span>;

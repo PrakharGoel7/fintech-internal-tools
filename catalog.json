@@ -344,7 +344,7 @@
     },
     {
       "name": "review-queue",
-      "version": "1.1.0",
+      "version": "2.0.0",
       "category": "workflow",
       "summary": "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
       "useWhen": [
@@ -409,7 +409,19 @@
           "field": "created_at",
           "hours": 48
         },
-        "priorityField": "risk_score"
+        "badges": [
+          {
+            "when": [
+              {
+                "field": "risk_score",
+                "op": "gt",
+                "value": 70
+              }
+            ],
+            "label": "High risk",
+            "tone": "bad"
+          }
+        ]
       },
       "usedBy": [
         "kyc-review",
@@ -598,9 +610,91 @@
             ],
             "additionalProperties": false
           },
-          "priorityField": {
+          "statusField": {
             "type": "string",
-            "description": "Numeric field; higher = shown with a risk badge"
+            "default": "status"
+          },
+          "badges": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "when": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "field": {
+                        "type": "string"
+                      },
+                      "op": {
+                        "type": "string",
+                        "enum": [
+                          "eq",
+                          "neq",
+                          "gt",
+                          "gte",
+                          "lt",
+                          "lte",
+                          "in",
+                          "notIn"
+                        ]
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": [
+                                "string",
+                                "number"
+                              ]
+                            }
+                          }
+                        ]
+                      }
+                    },
+                    "required": [
+                      "field",
+                      "op",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "label": {
+                  "type": "string"
+                },
+                "tone": {
+                  "type": "string",
+                  "enum": [
+                    "neutral",
+                    "info",
+                    "good",
+                    "warn",
+                    "bad",
+                    "accent"
+                  ],
+                  "default": "bad"
+                }
+              },
+              "required": [
+                "when",
+                "label"
+              ],
+              "additionalProperties": false
+            },
+            "default": [],
+            "description": "Flags shown on queue items matching the conditions, e.g. high risk or high value"
           },
           "comments": {
             "type": "boolean",
@@ -1289,7 +1383,12 @@
           },
           "vendor_result": {
             "label": "Vendor result",
-            "type": "status"
+            "type": "status",
+            "tones": {
+              "clear": "good",
+              "needs_review": "warn",
+              "watchlist_hit": "bad"
+            }
           },
           "status": {
             "label": "Status",
@@ -1346,7 +1445,11 @@
           },
           "status": {
             "label": "Status",
-            "type": "status"
+            "type": "status",
+            "tones": {
+              "issued": "good",
+              "denied": "bad"
+            }
           },
           "stripe_refund_id": {
             "label": "Stripe refund",
@@ -1412,7 +1515,14 @@
           },
           "status": {
             "label": "Status",
-            "type": "status"
+            "type": "status",
+            "tones": {
+              "needs_response": "warn",
+              "under_review": "info",
+              "won": "good",
+              "lost": "bad",
+              "accepted": "neutral"
+            }
           },
           "assignee": {
             "label": "Assignee",

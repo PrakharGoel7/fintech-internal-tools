@@ -62,66 +62,16 @@ CREATE TABLE IF NOT EXISTS app_requests (
   issue_url TEXT,
   devin_session_url TEXT
 );
-CREATE TABLE IF NOT EXISTS kyc_cases (
-  id TEXT PRIMARY KEY,
-  customer_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  ssn_last4 TEXT NOT NULL,
-  dob TEXT NOT NULL,
-  country TEXT NOT NULL,
-  doc_type TEXT NOT NULL,
-  risk_score INTEGER NOT NULL,
-  vendor_result TEXT NOT NULL,
-  status TEXT NOT NULL,
-  assignee TEXT,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS refunds (
-  id TEXT PRIMARY KEY,
-  charge_id TEXT NOT NULL,
-  customer_name TEXT NOT NULL,
-  email TEXT NOT NULL,
-  amount REAL NOT NULL,
-  currency TEXT NOT NULL,
-  reason TEXT NOT NULL,
-  status TEXT NOT NULL,
-  stripe_refund_id TEXT,
-  requested_by TEXT NOT NULL,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS disputes (
-  id TEXT PRIMARY KEY,
-  charge_id TEXT NOT NULL,
-  customer_name TEXT NOT NULL,
-  customer_email TEXT NOT NULL,
-  amount REAL NOT NULL,
-  currency TEXT NOT NULL,
-  card_network TEXT NOT NULL,
-  reason TEXT NOT NULL,
-  evidence_due_by TEXT NOT NULL,
-  status TEXT NOT NULL,
-  assignee TEXT,
-  evidence_submission_id TEXT,
-  win_pct INTEGER,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS feature_flags (
-  id TEXT PRIMARY KEY,
-  description TEXT NOT NULL,
-  owner TEXT NOT NULL,
-  enabled_dev INTEGER NOT NULL,
-  enabled_staging INTEGER NOT NULL,
-  enabled_prod INTEGER NOT NULL,
-  rollout_pct INTEGER NOT NULL,
-  created_at TEXT NOT NULL,
-  updated_at TEXT NOT NULL
-);
 `;
 
 const g = globalThis as unknown as { __db?: DatabaseSync };
+const tableDdl: string[] = [];
+
+/** Connectors register the tables they own; the platform schema stays app-agnostic. */
+export function registerTable(ddl: string) {
+  tableDdl.push(ddl);
+  g.__db?.exec(ddl);
+}
 
 export function getDb(): DatabaseSync {
   if (!g.__db) {
@@ -130,6 +80,7 @@ export function getDb(): DatabaseSync {
     const db = new DatabaseSync(file);
     db.exec("PRAGMA journal_mode = WAL;");
     db.exec(SCHEMA);
+    for (const ddl of tableDdl) db.exec(ddl);
     g.__db = db;
   }
   return g.__db;

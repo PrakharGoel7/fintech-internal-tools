@@ -12,7 +12,7 @@ description: Turn an internal-tool request (from ops, compliance or engineering)
 ## Phase 1 — Spec + gap analysis (STOP for approval when the requester is available)
 Write a short spec (post it in the PR description / session) containing:
 - **Users & roles** → `permissions` map (reuse roles from `src/platform/users.ts`; add a role only if none fits).
-- **Data** → existing source, or a new `SourceDef` in `src/connectors/index.ts` (+ table in `src/platform/db.ts`, + synthetic seed rows in `scripts/seed.ts`). Tag every PII field.
+- **Data** → existing source, or a new `SourceDef` in `src/connectors/index.ts` (the table is created from its `fields`, in column order; add synthetic seed rows in `scripts/seed.ts`; give domain status values badge `tones`). Tag every PII field.
 - **Actions** → each with permission, effect, `availableWhen`, `reasonCodes`, `approval` rule.
 - **Pages** → blocks and their config.
 - **Requirement coverage table** — classify every requirement:

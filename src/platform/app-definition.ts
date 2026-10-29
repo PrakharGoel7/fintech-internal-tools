@@ -52,7 +52,7 @@ export type BlockInstance = z.infer<typeof blockInstanceSchema>;
 export const pageSchema = z.object({
   id: z.string(),
   title: z.string(),
-  /** e.g. "" (home), "queue", "refunds/:id" */
+  /** e.g. "" (home), "queue", "items/:id" */
   path: z.string(),
   nav: z.boolean().default(true),
   blocks: z.array(blockInstanceSchema).min(1),

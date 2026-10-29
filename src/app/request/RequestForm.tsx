@@ -9,10 +9,10 @@ const FIELDS: [string, string, string][] = [
   ["title", "App name", "e.g. Chargeback dispute queue"],
   ["team", "Your team", "e.g. Risk Ops"],
   ["users", "Who will use it?", "e.g. 6 risk analysts, 1 lead"],
-  ["problem", "What problem does it solve? How is it done today?", "Today we track disputes in a spreadsheet…"],
-  ["data", "What data does it need?", "Stripe disputes, customer profile, transaction history"],
+  ["problem", "What problem does it solve? How is it done today?", "Today we track these in a spreadsheet…"],
+  ["data", "What data does it need?", "Stripe charges, customer profile, transaction history"],
   ["actions", "What do users do in it?", "Claim a dispute, upload evidence, accept or contest"],
-  ["approvals", "Anything that needs a second approver?", "Accepting disputes over $1,000"],
+  ["approvals", "Anything that needs a second approver?", "Write-offs over $1,000"],
 ];
 
 export function RequestForm() {

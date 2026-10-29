@@ -76,7 +76,7 @@ export default defineApp({
             summaryFields: ["customer_name", "country", { field: "risk_score", label: "Risk" }],
             detailFields: ["customer_name", "email", "ssn_last4", "dob", "country", "doc_type", "risk_score", "vendor_result", "assignee"],
             sla: { field: "created_at", hours: 72 },
-            priorityField: "risk_score",
+            badges: [{ when: [{ field: "risk_score", op: "gt", value: 70 }], label: "High risk", tone: "bad" }],
           },
         },
       ],
