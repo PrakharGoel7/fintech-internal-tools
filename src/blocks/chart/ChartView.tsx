@@ -10,7 +10,7 @@ export function ChartView({ kind, data, currency }: { kind: "bar" | "line" | "pi
       <ResponsiveContainer width="100%" height="100%">
         {kind === "pie" ? (
           <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" outerRadius={90} label={(e) => String(e.name ?? "").replace(/_/g, " ")}>
+            <Pie data={data} dataKey="value" nameKey="name" outerRadius={80} isAnimationActive={false} label={(e) => String(e.name ?? "").replace(/_/g, " ")}>
               {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
             </Pie>
             <Tooltip formatter={(v) => fmt(Number(v))} />
@@ -21,7 +21,7 @@ export function ChartView({ kind, data, currency }: { kind: "bar" | "line" | "pi
             <XAxis dataKey="name" fontSize={11} tickFormatter={(v: string) => v.slice(5)} />
             <YAxis fontSize={11} tickFormatter={fmt} width={60} />
             <Tooltip formatter={(v) => fmt(Number(v))} />
-            <Line type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="value" stroke="#4f46e5" strokeWidth={2} dot={false} isAnimationActive={false} />
           </LineChart>
         ) : (
           <BarChart data={data}>
@@ -29,7 +29,7 @@ export function ChartView({ kind, data, currency }: { kind: "bar" | "line" | "pi
             <XAxis dataKey="name" fontSize={11} tickFormatter={(v: string) => v.replace(/_/g, " ")} />
             <YAxis fontSize={11} tickFormatter={fmt} width={60} />
             <Tooltip formatter={(v) => fmt(Number(v))} />
-            <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="value" fill="#4f46e5" radius={[4, 4, 0, 0]} isAnimationActive={false} />
           </BarChart>
         )}
       </ResponsiveContainer>

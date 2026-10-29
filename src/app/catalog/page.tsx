@@ -22,7 +22,7 @@ export default function Catalog() {
         <h2 className="mb-2 text-sm font-semibold uppercase tracking-wide text-slate-500">Reuse matrix</h2>
         <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
           <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-xs text-slate-500"><tr><th className="px-3 py-2 text-left">Block</th>{apps.map((a) => <th key={a.slug} className="px-3 py-2">{a.icon} {a.name}</th>)}<th className="px-3 py-2">Apps</th></tr></thead>
+            <thead className="bg-slate-50 text-xs text-slate-500"><tr><th className="px-3 py-2 text-left">Block</th>{apps.map((a) => <th key={a.slug} className="px-3 py-2">{a.name}</th>)}<th className="px-3 py-2">Apps</th></tr></thead>
             <tbody className="divide-y divide-slate-100">
               {Object.values(manifests).map((m) => (
                 <tr key={m.name}><td className="px-3 py-1.5 font-mono text-xs">{m.name}</td>{apps.map((a) => <td key={a.slug} className="px-3 py-1.5 text-center">{usage(m.name).includes(a) ? "●" : ""}</td>)}<td className="px-3 py-1.5 text-center font-semibold">{usage(m.name).length}</td></tr>

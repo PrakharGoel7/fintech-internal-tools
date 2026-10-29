@@ -3,6 +3,7 @@ import { getCurrentUser } from "./session";
 import { apps } from "@/apps/registry";
 import { can } from "@/platform";
 import { manifests } from "@/blocks/manifests";
+import { AppIcon } from "@/components/AppIcon";
 
 export default async function Home() {
   const user = await getCurrentUser();
@@ -23,7 +24,7 @@ export default async function Home() {
           return (
             <Link key={a.slug} href={`/apps/${a.slug}`} className="group rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:border-indigo-300 hover:shadow">
               <div className="flex items-center gap-3">
-                <span className="text-3xl">{a.icon}</span>
+                <AppIcon app={a} size="lg" />
                 <div>
                   <div className="font-semibold group-hover:text-indigo-700">{a.name}</div>
                   <div className="text-xs uppercase tracking-wide text-slate-400">{a.category}</div>

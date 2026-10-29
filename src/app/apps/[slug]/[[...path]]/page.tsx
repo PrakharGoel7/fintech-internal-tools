@@ -4,6 +4,7 @@ import { apps } from "@/apps/registry";
 import { can, type PageDef } from "@/platform";
 import { blocks } from "@/blocks/registry";
 import { getCurrentUser } from "@/app/session";
+import { AppIcon } from "@/components/AppIcon";
 
 function matchPage(pages: PageDef[], segs: string[]) {
   for (const p of pages) {
@@ -33,7 +34,7 @@ export default async function AppPage({ params, searchParams }: { params: Promis
   return (
     <div>
       <div className="mb-5 flex flex-wrap items-center gap-4">
-        <span className="text-3xl">{app.icon}</span>
+        <AppIcon app={app} size="lg" />
         <div>
           <h1 className="text-xl font-semibold">{app.name}</h1>
           <p className="text-xs text-slate-500">config: <code className="font-mono">src/apps/{app.slug}/app.ts</code></p>
