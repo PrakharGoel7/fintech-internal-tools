@@ -20,7 +20,7 @@ export function FieldList({ ctx, source, record, cols }: { ctx: BlockContext; so
           <dd className="mt-0.5 text-sm text-slate-800">
             {c.pii
               ? <PiiValue masked={String(record[c.field] ?? "")} canReveal={canReveal} appSlug={ctx.app.slug} source={source} recordId={String(record[pk])} field={c.field} />
-              : <FormattedValue value={record[c.field]} format={c.format} />}
+              : <FormattedValue value={record[c.field]} format={c.format} tones={c.tones} />}
           </dd>
         </div>
       ))}

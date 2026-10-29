@@ -15,14 +15,19 @@ export const configSchema = z.object({
     hours: z.number().positive().describe("elapsed: SLA length in hours. deadline: show a warning when fewer hours remain"),
     mode: z.enum(["elapsed", "deadline"]).default("elapsed").describe("elapsed: due = field + hours (e.g. created_at). deadline: field is an absolute due date (e.g. evidence_due_by)"),
   }).optional(),
-  priorityField: z.string().optional().describe("Numeric field; higher = shown with a risk badge"),
+  statusField: z.string().default("status"),
+  badges: z.array(z.object({
+    when: conditionsSchema,
+    label: z.string(),
+    tone: z.enum(["neutral", "info", "good", "warn", "bad", "accent"]).default("bad"),
+  })).default([]).describe("Flags shown on queue items matching the conditions, e.g. high risk or high value"),
   comments: z.boolean().default(true),
   history: z.boolean().default(true),
 });
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "review-queue",
-  version: "1.1.0",
+  version: "2.0.0",
   category: "workflow",
   summary: "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
   useWhen: ["Humans process items one at a time and record a decision (KYC, disputes, fraud alerts, content review)", "Work needs ownership and SLA tracking", "Items have an external hard deadline (sla.mode = deadline)"],
@@ -39,6 +44,6 @@ export const manifest: BlockManifest<typeof configSchema> = {
     summaryFields: ["customer_name", "country", "risk_score"],
     detailFields: ["customer_name", "email", "ssn_last4", "dob", "doc_type", "vendor_result"],
     sla: { field: "created_at", hours: 48 },
-    priorityField: "risk_score",
+    badges: [{ when: [{ field: "risk_score", op: "gt", value: 70 }], label: "High risk", tone: "bad" }],
   },
 };

@@ -1,4 +1,4 @@
-import { getDb, type Row } from "@/platform/db";
+import { getDb, registerTable, type Row } from "@/platform/db";
 import { maskRow } from "@/platform/pii";
 import { matches, type Condition } from "@/platform/conditions";
 
@@ -12,7 +12,24 @@ export interface SourceDef {
   piiFields: string[];
   searchFields: string[];
   defaultSort?: { field: string; dir: "asc" | "desc" };
-  fields: Record<string, { label: string; type: "text" | "number" | "currency" | "date" | "boolean" | "status" }>;
+  /** Column order = table column order. The table is created from this definition. */
+  fields: Record<string, FieldDef>;
+}
+
+export type Tone = "neutral" | "info" | "good" | "warn" | "bad" | "accent";
+
+export interface FieldDef {
+  label: string;
+  type: "text" | "number" | "currency" | "date" | "boolean" | "status";
+  /** For status fields: badge tone per value. Common workflow words have defaults. */
+  tones?: Record<string, Tone>;
+}
+
+const SQL_TYPE: Record<FieldDef["type"], string> = { text: "TEXT", status: "TEXT", date: "TEXT", number: "NUMERIC", currency: "REAL", boolean: "INTEGER" };
+
+export function tableDdl(def: SourceDef): string {
+  const cols = Object.entries(def.fields).map(([k, f]) => `  ${k} ${SQL_TYPE[f.type]}${k === def.pk ? " PRIMARY KEY" : ""}`);
+  return `CREATE TABLE IF NOT EXISTS ${def.table} (\n${cols.join(",\n")}\n);`;
 }
 
 export interface ListOptions {
@@ -24,7 +41,9 @@ export interface ListOptions {
 
 /** L2 connector over a SQL table. Blocks talk to this, never to the database. */
 export class TableSource {
-  constructor(public def: SourceDef) {}
+  constructor(public def: SourceDef) {
+    registerTable(tableDdl(def));
+  }
 
   private all(): Row[] {
     return getDb().prepare(`SELECT * FROM ${this.def.table}`).all() as Row[];

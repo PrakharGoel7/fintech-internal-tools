@@ -1,6 +1,6 @@
 import { TableSource, type SourceDef } from "./table-source";
 export { externalConnectors } from "./external";
-export type { SourceDef, ListOptions } from "./table-source";
+export type { SourceDef, ListOptions, FieldDef, Tone } from "./table-source";
 export { TableSource };
 
 const defs: SourceDef[] = [
@@ -22,7 +22,7 @@ const defs: SourceDef[] = [
       country: { label: "Country", type: "text" },
       doc_type: { label: "Document", type: "text" },
       risk_score: { label: "Risk score", type: "number" },
-      vendor_result: { label: "Vendor result", type: "status" },
+      vendor_result: { label: "Vendor result", type: "status", tones: { clear: "good", needs_review: "warn", watchlist_hit: "bad" } },
       status: { label: "Status", type: "status" },
       assignee: { label: "Assignee", type: "text" },
       created_at: { label: "Submitted", type: "date" },
@@ -46,7 +46,7 @@ const defs: SourceDef[] = [
       amount: { label: "Amount", type: "currency" },
       currency: { label: "Currency", type: "text" },
       reason: { label: "Reason", type: "text" },
-      status: { label: "Status", type: "status" },
+      status: { label: "Status", type: "status", tones: { issued: "good", denied: "bad" } },
       stripe_refund_id: { label: "Stripe refund", type: "text" },
       requested_by: { label: "Requested by", type: "text" },
       created_at: { label: "Requested", type: "date" },
@@ -72,7 +72,7 @@ const defs: SourceDef[] = [
       card_network: { label: "Network", type: "text" },
       reason: { label: "Reason", type: "text" },
       evidence_due_by: { label: "Evidence due", type: "date" },
-      status: { label: "Status", type: "status" },
+      status: { label: "Status", type: "status", tones: { needs_response: "warn", under_review: "info", won: "good", lost: "bad", accepted: "neutral" } },
       assignee: { label: "Assignee", type: "text" },
       evidence_submission_id: { label: "Evidence submission", type: "text" },
       win_pct: { label: "Win %", type: "number" },
