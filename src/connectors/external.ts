@@ -16,6 +16,17 @@ export const externalConnectors: Record<string, Record<string, ConnectorOp>> = {
       if (!record) throw new Error("stripe.refund requires a record");
       return { status: "issued", stripe_refund_id: id("re") };
     },
+    /** stripe.disputes.update(id, { evidence, submit: true }) – Stripe rejects evidence after `evidence_due_by`. */
+    submitDisputeEvidence: (record) => {
+      if (!record) throw new Error("stripe.submitDisputeEvidence requires a record");
+      if (new Date(String(record.evidence_due_by)).getTime() < Date.now()) throw new Error("Evidence deadline has passed; Stripe no longer accepts evidence");
+      return { status: "under_review", evidence_submission_id: id("evs") };
+    },
+    /** stripe.disputes.close(id) – accepts the dispute; the disputed amount is forfeited (written off). */
+    acceptDispute: (record) => {
+      if (!record) throw new Error("stripe.acceptDispute requires a record");
+      return { status: "accepted" };
+    },
   },
   kycVendor: {
     /** Re-run watchlist / document screening with the KYC vendor (Persona/Alloy-style). */

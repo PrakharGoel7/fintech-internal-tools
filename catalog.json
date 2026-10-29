@@ -57,7 +57,8 @@
       },
       "usedBy": [
         "kyc-review",
-        "refunds"
+        "refunds",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -267,7 +268,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "feature-flags"
+        "feature-flags",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -342,12 +344,13 @@
     },
     {
       "name": "review-queue",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "workflow",
-      "summary": "Claimable work queue with SLA timers, assignment, detail panel, decisions, comments and per-item audit history.",
+      "summary": "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
       "useWhen": [
         "Humans process items one at a time and record a decision (KYC, disputes, fraud alerts, content review)",
-        "Work needs ownership and SLA tracking"
+        "Work needs ownership and SLA tracking",
+        "Items have an external hard deadline (sla.mode = deadline)"
       ],
       "notFor": [
         "Read-only browsing (use data-grid)",
@@ -409,7 +412,8 @@
         "priorityField": "risk_score"
       },
       "usedBy": [
-        "kyc-review"
+        "kyc-review",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -570,11 +574,22 @@
             "type": "object",
             "properties": {
               "field": {
-                "type": "string"
+                "type": "string",
+                "description": "Timestamp field the timer is based on"
               },
               "hours": {
                 "type": "number",
-                "exclusiveMinimum": 0
+                "exclusiveMinimum": 0,
+                "description": "elapsed: SLA length in hours. deadline: show a warning when fewer hours remain"
+              },
+              "mode": {
+                "type": "string",
+                "enum": [
+                  "elapsed",
+                  "deadline"
+                ],
+                "default": "elapsed",
+                "description": "elapsed: due = field + hours (e.g. created_at). deadline: field is an absolute due date (e.g. evidence_due_by)"
               }
             },
             "required": [
@@ -649,7 +664,8 @@
       },
       "usedBy": [
         "kyc-review",
-        "refunds"
+        "refunds",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -804,7 +820,8 @@
         "currency": true
       },
       "usedBy": [
-        "refunds"
+        "refunds",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -1146,7 +1163,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "feature-flags"
+        "feature-flags",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -1204,7 +1222,8 @@
       },
       "usedBy": [
         "kyc-review",
-        "refunds"
+        "refunds",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -1348,6 +1367,76 @@
         }
       },
       {
+        "name": "disputes",
+        "pk": "id",
+        "piiFields": [
+          "customer_name",
+          "customer_email"
+        ],
+        "fields": {
+          "id": {
+            "label": "Dispute",
+            "type": "text"
+          },
+          "charge_id": {
+            "label": "Charge",
+            "type": "text"
+          },
+          "customer_name": {
+            "label": "Customer",
+            "type": "text"
+          },
+          "customer_email": {
+            "label": "Customer email",
+            "type": "text"
+          },
+          "amount": {
+            "label": "Amount",
+            "type": "currency"
+          },
+          "currency": {
+            "label": "Currency",
+            "type": "text"
+          },
+          "card_network": {
+            "label": "Network",
+            "type": "text"
+          },
+          "reason": {
+            "label": "Reason",
+            "type": "text"
+          },
+          "evidence_due_by": {
+            "label": "Evidence due",
+            "type": "date"
+          },
+          "status": {
+            "label": "Status",
+            "type": "status"
+          },
+          "assignee": {
+            "label": "Assignee",
+            "type": "text"
+          },
+          "evidence_submission_id": {
+            "label": "Evidence submission",
+            "type": "text"
+          },
+          "win_pct": {
+            "label": "Win %",
+            "type": "number"
+          },
+          "created_at": {
+            "label": "Opened",
+            "type": "date"
+          },
+          "updated_at": {
+            "label": "Updated",
+            "type": "date"
+          }
+        }
+      },
+      {
         "name": "feature_flags",
         "pk": "id",
         "piiFields": [],
@@ -1393,7 +1482,9 @@
     ],
     "external": {
       "stripe": [
-        "refund"
+        "refund",
+        "submitDisputeEvidence",
+        "acceptDispute"
       ],
       "kycVendor": [
         "rescreen"
@@ -1473,6 +1564,31 @@
         "audit-timeline",
         "record-detail",
         "form"
+      ]
+    },
+    {
+      "slug": "chargeback-disputes",
+      "name": "Chargeback Dispute Queue",
+      "permissions": [
+        "view",
+        "work",
+        "pii.reveal",
+        "comment",
+        "export"
+      ],
+      "actions": [
+        "claim",
+        "contest",
+        "accept"
+      ],
+      "blocks": [
+        "metric-cards",
+        "review-queue",
+        "chart",
+        "data-grid",
+        "record-detail",
+        "audit-timeline",
+        "comments"
       ]
     }
   ]

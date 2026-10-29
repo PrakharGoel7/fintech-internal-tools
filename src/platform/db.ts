@@ -91,6 +91,23 @@ CREATE TABLE IF NOT EXISTS refunds (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
+CREATE TABLE IF NOT EXISTS disputes (
+  id TEXT PRIMARY KEY,
+  charge_id TEXT NOT NULL,
+  customer_name TEXT NOT NULL,
+  customer_email TEXT NOT NULL,
+  amount REAL NOT NULL,
+  currency TEXT NOT NULL,
+  card_network TEXT NOT NULL,
+  reason TEXT NOT NULL,
+  evidence_due_by TEXT NOT NULL,
+  status TEXT NOT NULL,
+  assignee TEXT,
+  evidence_submission_id TEXT,
+  win_pct INTEGER,
+  created_at TEXT NOT NULL,
+  updated_at TEXT NOT NULL
+);
 CREATE TABLE IF NOT EXISTS feature_flags (
   id TEXT PRIMARY KEY,
   description TEXT NOT NULL,
