@@ -13,10 +13,14 @@ export function resolveColumns(cols: Column[], def: SourceDef): ResolvedColumn[]
   });
 }
 
+/** Tone colours for badges (use with the `.badge` class). */
 export const TONE_CLS: Record<Tone, string> = {
-  neutral: "bg-slate-100 text-slate-700", info: "bg-blue-100 text-blue-800", good: "bg-emerald-100 text-emerald-800",
-  warn: "bg-amber-100 text-amber-800", bad: "bg-rose-100 text-rose-800", accent: "bg-purple-100 text-purple-800",
+  neutral: "bg-slate-50 text-slate-600 ring-slate-500/20", info: "bg-sky-50 text-sky-700 ring-sky-600/20",
+  good: "bg-emerald-50 text-emerald-700 ring-emerald-600/20", warn: "bg-amber-50 text-amber-800 ring-amber-600/25",
+  bad: "bg-rose-50 text-rose-700 ring-rose-600/20", accent: "bg-violet-50 text-violet-700 ring-violet-600/20",
 };
+
+const humanize = (v: string) => { const s = v.replace(/_/g, " "); return s.charAt(0).toUpperCase() + s.slice(1); };
 
 /** Generic workflow vocabulary only. Domain-specific values belong in the source's `fields[x].tones`. */
 const DEFAULT_TONES: Record<string, Tone> = {
@@ -29,10 +33,12 @@ const DEFAULT_TONES: Record<string, Tone> = {
 
 export function StatusBadge({ value, tones }: { value: unknown; tones?: Record<string, Tone> }) {
   const v = String(value ?? "");
-  if (!v) return <span className="text-slate-400">—</span>;
+  if (!v) return <span className="text-slate-300">—</span>;
   const tone = tones?.[v] ?? DEFAULT_TONES[v] ?? "neutral";
-  return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${TONE_CLS[tone]}`}>{v.replace(/_/g, " ")}</span>;
+  return <span className={`badge ${TONE_CLS[tone]}`}><span className="h-1.5 w-1.5 rounded-full bg-current opacity-60" />{humanize(v)}</span>;
 }
+
+export const NUMERIC: Format[] = ["currency", "number", "percent"];
 
 export function relative(iso: string) {
   const ms = Date.now() - new Date(iso).getTime();
@@ -47,7 +53,7 @@ export function formatPlain(value: unknown, format: Format): string {
   switch (format) {
     case "currency": return Number(value).toLocaleString("en-US", { style: "currency", currency: "USD" });
     case "number": return Number(value).toLocaleString("en-US", { maximumFractionDigits: 2 });
-    case "percent": return `${Number(value)}%`;
+    case "percent": return `${Number(value).toLocaleString("en-US", { maximumFractionDigits: 1 })}%`;
     case "date": return new Date(String(value)).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
     case "datetime": return new Date(String(value)).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
     case "relative": return relative(String(value));
@@ -60,7 +66,9 @@ export function FormattedValue({ value, format, tones }: { value: unknown; forma
   if (format === "status") return <StatusBadge value={value} tones={tones} />;
   if (format === "boolean") {
     const on = Number(value) === 1;
-    return <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-semibold ${on ? "bg-emerald-100 text-emerald-800" : "bg-slate-100 text-slate-500"}`}>{on ? "ON" : "OFF"}</span>;
+    return <span className={`badge ${TONE_CLS[on ? "good" : "neutral"]}`}>{on ? "On" : "Off"}</span>;
   }
-  return <>{formatPlain(value, format)}</>;
+  const text = formatPlain(value, format);
+  if (text === "—") return <span className="text-slate-300">—</span>;
+  return NUMERIC.includes(format) ? <span className="tabular-nums">{text}</span> : <>{text}</>;
 }

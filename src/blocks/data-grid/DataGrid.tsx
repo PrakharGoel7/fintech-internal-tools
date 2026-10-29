@@ -4,7 +4,7 @@ import { getSource } from "@/connectors";
 import { can, type Condition } from "@/platform";
 import type { BlockProps } from "../types";
 import type { configSchema } from "./manifest";
-import { resolveColumns, FormattedValue } from "../_shared/format";
+import { resolveColumns, FormattedValue, NUMERIC } from "../_shared/format";
 import { actionMeta } from "../_shared/actions";
 import { ActionButton } from "../_shared/ActionButton";
 import { GridToolbar } from "./GridToolbar";
@@ -27,19 +27,19 @@ export function DataGrid({ config, ctx, title }: BlockProps<z.infer<typeof confi
   const exportHref = `/api/export?${new URLSearchParams({ ...ctx.search, app: ctx.app.slug, page: ctx.pageId, block: String(ctx.blockIndex) })}`;
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
+    <div className="card overflow-hidden">
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-4 py-3">
-        <h3 className="text-sm font-semibold text-slate-800">{title ?? `${source.def.label}s`} <span className="ml-1 font-normal text-slate-400">{all.length}</span></h3>
+        <h3 className="card-title">{title ?? `${source.def.label}s`} <span className="ml-1.5 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 tabular-nums">{all.length}</span></h3>
         <div className="flex items-center gap-2">
           <GridToolbar searchable={config.searchable} filters={config.filters.map((f) => ({ field: f.field, label: f.label ?? source.def.fields[f.field]?.label ?? f.field, options: f.options }))} />
-          {canExport && <a href={exportHref} className="rounded-md border border-slate-300 px-2.5 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-50">Export CSV</a>}
+          {canExport && <a href={exportHref} className="btn btn-xs btn-secondary">Export CSV</a>}
         </div>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
-          <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+          <thead className="table-head border-b border-slate-100">
             <tr>
-              {cols.map((c) => <th key={c.field} className="px-4 py-2 font-medium">{c.label}</th>)}
+              {cols.map((c) => <th key={c.field} className={`px-4 py-2.5 ${NUMERIC.includes(c.format) ? "text-right" : ""}`}>{c.label}</th>)}
               {config.rowActions.length > 0 && <th className="px-4 py-2" />}
             </tr>
           </thead>
@@ -47,16 +47,16 @@ export function DataGrid({ config, ctx, title }: BlockProps<z.infer<typeof confi
             {rows.map((r) => {
               const id = String(r[source.def.pk]);
               return (
-                <tr key={id} className="hover:bg-slate-50/60">
+                <tr key={id} className="transition-colors hover:bg-slate-50/80">
                   {cols.map((c, i) => (
-                    <td key={c.field} className="whitespace-nowrap px-4 py-2 text-slate-700">
+                    <td key={c.field} className={`whitespace-nowrap px-4 py-2.5 text-slate-700 ${NUMERIC.includes(c.format) ? "text-right" : ""}`}>
                       {i === 0 && config.rowLink ? (
-                        <Link className="font-medium text-indigo-600 hover:underline" href={`${ctx.basePath}/${config.rowLink.replace(":id", encodeURIComponent(id))}`}>{String(r[c.field])}</Link>
+                        <Link className="link" href={`${ctx.basePath}/${config.rowLink.replace(":id", encodeURIComponent(id))}`}>{String(r[c.field])}</Link>
                       ) : c.pii ? <span className="font-mono text-slate-500">{String(r[c.field])}</span> : <FormattedValue value={r[c.field]} format={c.format} tones={c.tones} />}
                     </td>
                   ))}
                   {config.rowActions.length > 0 && (
-                    <td className="whitespace-nowrap px-4 py-2 text-right">
+                    <td className="whitespace-nowrap px-4 py-2.5 text-right">
                       <div className="flex justify-end gap-1.5">
                         {config.rowActions.map((a) => {
                           const m = actionMeta(ctx, a, r);
