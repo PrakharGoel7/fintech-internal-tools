@@ -1,14 +1,12 @@
 import fs from "node:fs";
 import path from "node:path";
 import { manifests } from "@/blocks/manifests";
-import { apps } from "@/apps/registry";
 import { sources } from "@/connectors";
 import { externalConnectors } from "@/connectors/external";
 
 const CAT_COLOR: Record<string, string> = { data: "bg-sky-50 text-sky-700 ring-sky-600/20", workflow: "bg-violet-50 text-violet-700 ring-violet-600/20", insight: "bg-emerald-50 text-emerald-700 ring-emerald-600/20", input: "bg-amber-50 text-amber-800 ring-amber-600/25", collaboration: "bg-pink-50 text-pink-700 ring-pink-600/20", governance: "bg-rose-50 text-rose-700 ring-rose-600/20" };
 
 export default function Catalog() {
-  const usage = (name: string) => apps.filter((a) => a.pages.some((p) => p.blocks.some((b) => b.type === name)));
   let gaps = "";
   try { gaps = fs.readFileSync(path.join(process.cwd(), "GAPS.md"), "utf8"); } catch {}
   return (
@@ -17,20 +15,6 @@ export default function Catalog() {
         <h1 className="text-2xl font-semibold tracking-tight">Module catalog</h1>
         <p className="mt-1 text-sm text-slate-500">What Devin reads (as <code>catalog.json</code>) before composing an app. Every block has a typed config schema, use-when / not-for guidance, and declared guarantees.</p>
       </div>
-
-      <section>
-        <h2 className="eyebrow mb-2">Reuse matrix</h2>
-        <div className="card overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="table-head border-b border-slate-100 text-center"><tr><th className="px-3 py-2 text-left">Block</th>{apps.map((a) => <th key={a.slug} className="px-3 py-2">{a.name}</th>)}<th className="px-3 py-2">Apps</th></tr></thead>
-            <tbody className="divide-y divide-slate-100">
-              {Object.values(manifests).map((m) => (
-                <tr key={m.name}><td className="px-3 py-1.5"><span className="chip">{m.name}</span></td>{apps.map((a) => <td key={a.slug} className="px-3 py-1.5 text-center">{usage(m.name).includes(a) ? <span className="inline-block h-2 w-2 rounded-full bg-brand-500" /> : ""}</td>)}<td className="px-3 py-1.5 text-center font-semibold tabular-nums">{usage(m.name).length}</td></tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </section>
 
       <section>
         <h2 className="eyebrow mb-2">Blocks (L3)</h2>
@@ -72,12 +56,46 @@ export default function Catalog() {
         </div>
       </section>
 
-      {gaps && (
-        <section>
-          <h2 className="eyebrow mb-2">Gap ledger (GAPS.md)</h2>
-          <pre className="card overflow-x-auto whitespace-pre-wrap p-4 text-xs text-slate-700">{gaps}</pre>
-        </section>
-      )}
+      {gaps && <GapLedger md={gaps} />}
     </div>
+  );
+}
+
+const GAP_TONE: Record<string, string> = { open: "bg-amber-50 text-amber-800 ring-amber-600/25", "app-local": "bg-sky-50 text-sky-700 ring-sky-600/20", resolved: "bg-emerald-50 text-emerald-700 ring-emerald-600/20" };
+
+function Inline({ text }: { text: string }) {
+  return <>{text.split(/(`[^`]+`)/).map((t, i) => (t.startsWith("`") && t.endsWith("`") ? <code key={i} className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px] text-slate-700">{t.slice(1, -1)}</code> : t))}</>;
+}
+
+function GapLedger({ md }: { md: string }) {
+  const lines = md.split("\n").map((l) => l.trim());
+  const cells = (l: string) => l.replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
+  const rows = lines.filter((l) => l.startsWith("|") && !/^\|[\s|:-]+\|$/.test(l)).map(cells);
+  const [head, ...body] = rows;
+  const notes = lines.filter((l) => l && !l.startsWith("|") && !l.startsWith("#"));
+  return (
+    <section>
+      <h2 className="eyebrow mb-2">Gap ledger</h2>
+      <div className="card overflow-hidden">
+        <div className="space-y-1 border-b border-slate-100 px-4 py-3 text-sm text-slate-600">{notes.map((n) => <p key={n}><Inline text={n} /></p>)}</div>
+        {head && (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="table-head border-b border-slate-100 text-left"><tr>{head.map((h) => <th key={h} className="px-4 py-2">{h}</th>)}</tr></thead>
+              <tbody className="divide-y divide-slate-100 align-top">
+                {body.map((r) => (
+                  <tr key={r[0]}>
+                    {r.map((c, i) => {
+                      const status = c.match(/^([\w-]+)/)?.[1] ?? "";
+                      return <td key={i} className={`px-4 py-2.5 ${i === 0 ? "font-medium text-slate-800" : "text-slate-600"}`}>{i === r.length - 1 && GAP_TONE[status] ? <span className={`badge whitespace-nowrap ${GAP_TONE[status]}`}>{c}</span> : <Inline text={c} />}</td>;
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+    </section>
   );
 }
