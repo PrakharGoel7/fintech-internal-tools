@@ -54,12 +54,22 @@ export async function submitAppRequest(user: User, req: AppRequestInput) {
     if (r.ok) issueUrl = (await r.json()).html_url; else notes.push(`GitHub issue failed (${r.status})`);
   }
   if (process.env.DEVIN_API_KEY) {
-    const r = await fetch("https://api.devin.ai/v1/sessions", {
+    const orgId = process.env.DEVIN_ORG_ID;
+    const url = orgId
+      ? `https://api.devin.ai/v3/organizations/${orgId}/sessions`
+      : "https://api.devin.ai/v1/sessions";
+    const body = orgId
+      ? { prompt, title: `App request: ${req.title}`, repos: [repo], tags: ["app-request"] }
+      : { prompt, title: `App request: ${req.title}`, idempotent: true };
+    const r = await fetch(url, {
       method: "POST",
       headers: { Authorization: `Bearer ${process.env.DEVIN_API_KEY}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ prompt, title: `App request: ${req.title}`, idempotent: true }),
+      body: JSON.stringify(body),
     });
-    if (r.ok) sessionUrl = (await r.json()).url; else notes.push(`Devin API failed (${r.status})`);
+    if (r.ok) {
+      const data = await r.json();
+      sessionUrl = data.url ?? (data.session_id ? `https://app.devin.ai/sessions/${String(data.session_id).replace(/^devin-/, "")}` : null);
+    } else notes.push(`Devin API failed (${r.status})`);
   }
   const status = sessionUrl ? "devin_started" : issueUrl ? "issue_filed" : "submitted";
   db.prepare("UPDATE app_requests SET status=?, issue_url=?, devin_session_url=? WHERE id=?").run(status, issueUrl, sessionUrl, id);

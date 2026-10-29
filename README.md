@@ -30,7 +30,7 @@ npm install
 npm run seed           # synthetic data only
 npm run dev            # http://localhost:3000 — switch users via the MOCK SSO dropdown
 ```
-Optional: set `GITHUB_TOKEN` + `GITHUB_REPO` (files an issue per request) and/or `DEVIN_API_KEY` (starts a Devin session per request).
+Optional: set `GITHUB_TOKEN` + `GITHUB_REPO` (files an issue per request) and/or `DEVIN_API_KEY` + `DEVIN_ORG_ID` (starts a Devin session per request via the v3 API; create the key under Settings > Devin API — a service user with `UseDevinSessions`, or a PAT). Without `DEVIN_ORG_ID` the legacy v1 endpoint is used.
 
 ## Demo script
 1. **Alice (KYC analyst)** → KYC queue → claim a high-risk case → Approve → goes to Approvals (needs Compliance).
