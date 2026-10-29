@@ -78,5 +78,18 @@ for (let i = 1; i <= DISPUTES; i++) {
     status === "won" ? 100 : status === "lost" ? 0 : null, created, created);
 }
 
-audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES } });
+const aml = db.prepare(`INSERT INTO aml_alerts VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`);
+const amlRules = ["structuring_cash", "rapid_movement", "high_risk_geo", "velocity_spike", "round_amount_wires"];
+const ALERTS = 45;
+for (let i = 1; i <= ALERTS; i++) {
+  const n = name();
+  const status = i <= 16 ? "new" : i <= 24 ? "in_review" : i <= 30 ? "escalated" : pick(["closed_false_positive", "closed_false_positive", "closed_false_positive", "sar_filed"]);
+  const amount = i % 3 === 0 ? int(10001, 85000) + pick([0, 0.5]) : int(900, 9999) + pick([0, 0.25]);
+  const alerted = daysAgo(status === "new" ? int(0, 1) : status === "in_review" ? int(1, 3) : int(4, 25), int(0, 23));
+  aml.run(`alr_${1000 + i}`, n, email(n), String(int(10000000, 99999999)) + String(int(1000, 9999)), amount, pick(amlRules), int(10, 98), status,
+    status === "new" || (status === "escalated" && i % 2 === 0) ? null : status === "escalated" ? pick(["carol", "grace"]) : status === "in_review" ? "tom" : pick(["tom", "carol", "grace"]),
+    alerted, status === "sar_filed" ? `sar_${(60000 + i).toString(36)}` : null, alerted);
+}
+
+audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES, aml_alerts: ALERTS } });
 console.log(`Seeded ${file}`);

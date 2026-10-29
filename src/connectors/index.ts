@@ -101,6 +101,30 @@ const defs: SourceDef[] = [
       updated_at: { label: "Updated", type: "date" },
     },
   },
+  {
+    name: "aml_alerts",
+    table: "aml_alerts",
+    label: "Alert",
+    pk: "id",
+    titleField: "id",
+    piiFields: ["customer_name", "customer_email", "account_number"],
+    searchFields: ["id", "rule"],
+    defaultSort: { field: "alert_date", dir: "asc" },
+    fields: {
+      id: { label: "Alert", type: "text" },
+      customer_name: { label: "Customer", type: "text" },
+      customer_email: { label: "Customer email", type: "text" },
+      account_number: { label: "Account number", type: "text" },
+      amount: { label: "Amount", type: "currency" },
+      rule: { label: "Triggering rule", type: "text" },
+      risk_score: { label: "Risk score", type: "number" },
+      status: { label: "Status", type: "status", tones: { new: "info", in_review: "neutral", escalated: "warn", sar_filed: "bad", closed_false_positive: "good" } },
+      assignee: { label: "Assignee", type: "text" },
+      alert_date: { label: "Alert date", type: "date" },
+      sar_reference: { label: "SAR reference", type: "text" },
+      updated_at: { label: "Updated", type: "date" },
+    },
+  },
 ];
 
 export const sources: Record<string, TableSource> = Object.fromEntries(defs.map((d) => [d.name, new TableSource(d)]));

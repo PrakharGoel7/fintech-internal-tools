@@ -36,4 +36,11 @@ export const externalConnectors: Record<string, Record<string, ConnectorOp>> = {
       return { risk_score: score, vendor_result: score > 70 ? "watchlist_hit" : score > 40 ? "needs_review" : "clear" };
     },
   },
+  regulatoryFiling: {
+    /** Simulated SAR e-filing (FinCEN BSA E-Filing in production). Returns the filing reference. */
+    fileSar: (record) => {
+      if (!record) throw new Error("regulatoryFiling.fileSar requires a record");
+      return { status: "sar_filed", sar_reference: id("sar") };
+    },
+  },
 };

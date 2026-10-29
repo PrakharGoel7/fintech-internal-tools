@@ -58,7 +58,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "aml-alerts"
       ],
       "configSchema": {
         "type": "object",
@@ -269,7 +270,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "aml-alerts"
       ],
       "configSchema": {
         "type": "object",
@@ -425,7 +427,8 @@
       },
       "usedBy": [
         "kyc-review",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "aml-alerts"
       ],
       "configSchema": {
         "type": "object",
@@ -759,7 +762,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "aml-alerts"
       ],
       "configSchema": {
         "type": "object",
@@ -1258,7 +1262,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "aml-alerts"
       ],
       "configSchema": {
         "type": "object",
@@ -1317,7 +1322,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "aml-alerts"
       ],
       "configSchema": {
         "type": "object",
@@ -1588,6 +1594,72 @@
             "type": "date"
           }
         }
+      },
+      {
+        "name": "aml_alerts",
+        "pk": "id",
+        "piiFields": [
+          "customer_name",
+          "customer_email",
+          "account_number"
+        ],
+        "fields": {
+          "id": {
+            "label": "Alert",
+            "type": "text"
+          },
+          "customer_name": {
+            "label": "Customer",
+            "type": "text"
+          },
+          "customer_email": {
+            "label": "Customer email",
+            "type": "text"
+          },
+          "account_number": {
+            "label": "Account number",
+            "type": "text"
+          },
+          "amount": {
+            "label": "Amount",
+            "type": "currency"
+          },
+          "rule": {
+            "label": "Triggering rule",
+            "type": "text"
+          },
+          "risk_score": {
+            "label": "Risk score",
+            "type": "number"
+          },
+          "status": {
+            "label": "Status",
+            "type": "status",
+            "tones": {
+              "new": "info",
+              "in_review": "neutral",
+              "escalated": "warn",
+              "sar_filed": "bad",
+              "closed_false_positive": "good"
+            }
+          },
+          "assignee": {
+            "label": "Assignee",
+            "type": "text"
+          },
+          "alert_date": {
+            "label": "Alert date",
+            "type": "date"
+          },
+          "sar_reference": {
+            "label": "SAR reference",
+            "type": "text"
+          },
+          "updated_at": {
+            "label": "Updated",
+            "type": "date"
+          }
+        }
       }
     ],
     "external": {
@@ -1598,6 +1670,9 @@
       ],
       "kycVendor": [
         "rescreen"
+      ],
+      "regulatoryFiling": [
+        "fileSar"
       ]
     }
   },
@@ -1695,6 +1770,34 @@
         "metric-cards",
         "review-queue",
         "chart",
+        "data-grid",
+        "record-detail",
+        "audit-timeline",
+        "comments"
+      ]
+    },
+    {
+      "slug": "aml-alerts",
+      "name": "Transaction Monitoring Alerts",
+      "permissions": [
+        "view",
+        "triage",
+        "sar",
+        "pii.reveal",
+        "comment",
+        "export"
+      ],
+      "actions": [
+        "claim",
+        "closeFalsePositive",
+        "escalate",
+        "takeEscalation",
+        "fileSar",
+        "closeNoSar"
+      ],
+      "blocks": [
+        "metric-cards",
+        "review-queue",
         "data-grid",
         "record-detail",
         "audit-timeline",
