@@ -15,7 +15,7 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "chart",
-  version: "1.0.0",
+  version: "1.0.1",
   category: "insight",
   summary: "Bar/line/pie chart grouping a data source by a field (optionally bucketed by day).",
   useWhen: ["Trends over time", "Breakdowns by category/status"],

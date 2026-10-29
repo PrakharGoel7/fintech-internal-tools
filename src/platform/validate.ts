@@ -4,6 +4,14 @@ import { externalConnectors } from "@/connectors/external";
 import type { AppModule } from "./app-definition";
 import { ROLES } from "./users";
 
+/** Config keys the schema doesn't know (zod strips them silently), e.g. an option a block removed. */
+export function unknownKeys(input: unknown, parsed: unknown, path = ""): string[] {
+  if (Array.isArray(input) && Array.isArray(parsed)) return input.flatMap((v, i) => unknownKeys(v, parsed[i], `${path}[${i}]`));
+  if (!input || !parsed || typeof input !== "object" || typeof parsed !== "object" || Array.isArray(input)) return [];
+  const p = parsed as Record<string, unknown>;
+  return Object.entries(input).flatMap(([k, v]) => (k in p ? unknownKeys(v, p[k], path ? `${path}.${k}` : k) : [path ? `${path}.${k}` : k]));
+}
+
 /** Static checks that go beyond the zod schema: references between actions, blocks, sources, roles, handlers. */
 export function validateApp(app: AppModule): string[] {
   const errs: string[] = [];
@@ -33,6 +41,7 @@ export function validateApp(app: AppModule): string[] {
       const parsed = m.configSchema.safeParse(b.config);
       if (!parsed.success) return errs.push(`${where}: ${parsed.error.issues.map((x) => `${x.path.join(".")}: ${x.message}`).join("; ")}`);
       const cfg = parsed.data as Record<string, unknown>;
+      for (const k of unknownKeys(b.config, cfg)) errs.push(`${where}: unknown option "${k}" — see catalog.json`);
       if (typeof cfg.source === "string" && !sources[cfg.source]) errs.push(`${where}: unknown source "${cfg.source}"`);
       const refs = JSON.stringify(cfg).match(/"(?:claimAction|submitAction|action)":"([^"]+)"/g) ?? [];
       const listRefs = [...((cfg.rowActions as string[]) ?? []), ...((cfg.actions as string[]) ?? []), ...((cfg.decisionActions as string[]) ?? [])];

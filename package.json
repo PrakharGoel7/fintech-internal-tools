@@ -16,7 +16,8 @@
     "boundaries": "tsx scripts/check-boundaries.ts",
     "scenarios": "tsx scripts/scenarios.ts",
     "smoke": "tsx scripts/smoke.ts",
-    "check": "npm run typecheck && npm run lint && npm run boundaries && npm run validate-apps && npm run catalog -- --check && npm test"
+    "graph": "tsx scripts/graph.ts",
+    "check": "npm run typecheck && npm run lint && npm run boundaries && npm run validate-apps && npm run catalog -- --check && npm run graph -- --check && npm test"
   },
   "dependencies": {
     "next": "15.5.28",

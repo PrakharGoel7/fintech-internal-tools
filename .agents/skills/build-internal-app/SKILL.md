@@ -45,7 +45,8 @@ Ask the requester to tick, untick or edit the scenarios and answer the questions
 
 ## Phase 3 — Verify
 ```
-npm run seed && npm run catalog && npm run check && npm run build
+npm run seed && npm run catalog && npm run graph && npm run check && npm run build
+npm run graph -- --diff origin/main   # if you touched a block: bump its version (see AGENTS.md "Module versions")
 npm start & npm run smoke   # every page of every app, as every role allowed to view it
 ```
 A failing scenario means the app disagrees with what the requester confirmed: fix the app, or go back to the requester; never edit the scenario to make it pass. (Stop the server before re-running `npm run seed`; a running server keeps the old data.)
