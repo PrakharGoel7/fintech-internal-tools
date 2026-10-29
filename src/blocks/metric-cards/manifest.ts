@@ -16,7 +16,7 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "metric-cards",
-  version: "1.0.0",
+  version: "1.0.1",
   category: "insight",
   summary: "Row of KPI cards computed from a data source (count/sum/avg with filters).",
   useWhen: ["Headline numbers at the top of a dashboard or queue"],

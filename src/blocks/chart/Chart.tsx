@@ -2,7 +2,7 @@ import type { z } from "zod";
 import { getSource } from "@/connectors";
 import type { BlockProps } from "../types";
 import type { configSchema } from "./manifest";
-import { aggregate } from "../metric-cards/MetricCards";
+import { aggregate } from "../_shared/aggregate";
 import { ChartView } from "./ChartView";
 
 export function Chart({ config, title }: BlockProps<z.infer<typeof configSchema>>) {

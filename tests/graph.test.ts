@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { bumpOf, schemaChange } from "../scripts/graph-lib";
+import { unknownKeys } from "@/platform/validate";
 
 const obj = (properties: Record<string, object>, required: string[] = []) => ({ type: "object", properties, required });
 
@@ -20,5 +21,8 @@ describe("module versioning", () => {
     expect(schemaChange(base, obj(base.properties, ["source", "mode"]))).toBe("major");
     expect(schemaChange(base, obj({ ...base.properties, source: { type: "number" } }, ["source"]))).toBe("major");
     expect(schemaChange(base, obj({ ...base.properties, mode: { type: "string", enum: ["a"] } }, ["source"]))).toBe("major");
+  });
+  it("flags app config options a block no longer accepts", () => {
+    expect(unknownKeys({ a: 1, list: [{ x: 1, gone: 2 }], old: 3 }, { a: 1, list: [{ x: 1, extra: 0 }] })).toEqual(["list[0].gone", "old"]);
   });
 });

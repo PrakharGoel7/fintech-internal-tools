@@ -53,7 +53,7 @@ export function schemaChange(beforeIn: object, afterIn: object): Bump {
   return level === "none" ? "patch" : level;
 }
 
-/** Static import graph over src/: file → files it imports (resolved, repo-relative). */
+/** Static import graph over src/: file → files it imports at runtime (`import type` is ignored). */
 export function importGraph(root = "src"): Map<string, string[]> {
   const walk = (d: string): string[] => fs.readdirSync(d, { withFileTypes: true }).flatMap((e) => (e.isDirectory() ? walk(path.join(d, e.name)) : [path.join(d, e.name)]));
   const files = walk(root).filter((f) => /\.(ts|tsx)$/.test(f));
@@ -62,7 +62,7 @@ export function importGraph(root = "src"): Map<string, string[]> {
     if (!base) return null;
     return [base, `${base}.ts`, `${base}.tsx`, path.join(base, "index.ts")].find((c) => files.includes(c)) ?? null;
   };
-  return new Map(files.map((f) => [f, [...fs.readFileSync(f, "utf8").matchAll(/(?:from|import)\s*\(?\s*["']([^"']+)["']/g)].map((m) => resolve(f, m[1])).filter((x): x is string => !!x)]));
+  return new Map(files.map((f) => [f, [...fs.readFileSync(f, "utf8").replace(/^import type[\s\S]*?from\s*["'][^"']+["'];?/gm, "").matchAll(/(?:from|import)\s*\(?\s*["']([^"']+)["']/g)].map((m) => resolve(f, m[1])).filter((x): x is string => !!x)]));
 }
 
 /** All files reachable from `start` without leaving `within` (path prefixes). */

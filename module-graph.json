@@ -10,8 +10,7 @@
         "src/blocks/_shared/schema.ts",
         "src/blocks/data-grid/DataGrid.tsx",
         "src/blocks/data-grid/GridToolbar.tsx",
-        "src/blocks/data-grid/manifest.ts",
-        "src/blocks/types.ts"
+        "src/blocks/data-grid/manifest.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
@@ -38,8 +37,7 @@
         "src/blocks/_shared/format.tsx",
         "src/blocks/_shared/schema.ts",
         "src/blocks/record-detail/RecordDetail.tsx",
-        "src/blocks/record-detail/manifest.ts",
-        "src/blocks/types.ts"
+        "src/blocks/record-detail/manifest.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
@@ -66,16 +64,12 @@
         "src/blocks/_shared/format.tsx",
         "src/blocks/_shared/schema.ts",
         "src/blocks/audit-timeline/AuditTimeline.tsx",
-        "src/blocks/audit-timeline/manifest.ts",
         "src/blocks/comments/CommentBox.tsx",
         "src/blocks/comments/Comments.tsx",
-        "src/blocks/comments/manifest.ts",
         "src/blocks/record-detail/RecordDetail.tsx",
-        "src/blocks/record-detail/manifest.ts",
         "src/blocks/review-queue/ReviewQueue.tsx",
         "src/blocks/review-queue/manifest.ts",
-        "src/blocks/review-queue/sla.ts",
-        "src/blocks/types.ts"
+        "src/blocks/review-queue/sla.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
@@ -94,56 +88,39 @@
       ]
     },
     "metric-cards": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "files": [
+        "src/blocks/_shared/aggregate.ts",
         "src/blocks/_shared/format.tsx",
         "src/blocks/_shared/schema.ts",
         "src/blocks/metric-cards/MetricCards.tsx",
-        "src/blocks/metric-cards/manifest.ts",
-        "src/blocks/types.ts"
+        "src/blocks/metric-cards/manifest.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
         "src/connectors/index.ts",
         "src/connectors/table-source.ts",
-        "src/platform/actions.ts",
-        "src/platform/app-definition.ts",
-        "src/platform/audit.ts",
         "src/platform/conditions.ts",
         "src/platform/db.ts",
-        "src/platform/index.ts",
-        "src/platform/pii.ts",
-        "src/platform/rbac.ts",
-        "src/platform/scenarios.ts",
-        "src/platform/users.ts"
+        "src/platform/pii.ts"
       ]
     },
     "chart": {
-      "version": "1.0.0",
+      "version": "1.0.1",
       "files": [
-        "src/blocks/_shared/format.tsx",
+        "src/blocks/_shared/aggregate.ts",
         "src/blocks/_shared/schema.ts",
         "src/blocks/chart/Chart.tsx",
         "src/blocks/chart/ChartView.tsx",
-        "src/blocks/chart/manifest.ts",
-        "src/blocks/metric-cards/MetricCards.tsx",
-        "src/blocks/metric-cards/manifest.ts",
-        "src/blocks/types.ts"
+        "src/blocks/chart/manifest.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
         "src/connectors/index.ts",
         "src/connectors/table-source.ts",
-        "src/platform/actions.ts",
-        "src/platform/app-definition.ts",
-        "src/platform/audit.ts",
         "src/platform/conditions.ts",
         "src/platform/db.ts",
-        "src/platform/index.ts",
-        "src/platform/pii.ts",
-        "src/platform/rbac.ts",
-        "src/platform/scenarios.ts",
-        "src/platform/users.ts"
+        "src/platform/pii.ts"
       ]
     },
     "toggle-matrix": {
@@ -152,10 +129,8 @@
         "src/blocks/_shared/ActionButton.tsx",
         "src/blocks/_shared/actions.ts",
         "src/blocks/_shared/format.tsx",
-        "src/blocks/_shared/schema.ts",
         "src/blocks/toggle-matrix/ToggleMatrix.tsx",
-        "src/blocks/toggle-matrix/manifest.ts",
-        "src/blocks/types.ts"
+        "src/blocks/toggle-matrix/manifest.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
@@ -180,8 +155,7 @@
         "src/blocks/_shared/actions.ts",
         "src/blocks/form/Form.tsx",
         "src/blocks/form/FormView.tsx",
-        "src/blocks/form/manifest.ts",
-        "src/blocks/types.ts"
+        "src/blocks/form/manifest.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
@@ -203,10 +177,8 @@
       "version": "1.0.0",
       "files": [
         "src/blocks/_shared/format.tsx",
-        "src/blocks/_shared/schema.ts",
         "src/blocks/audit-timeline/AuditTimeline.tsx",
-        "src/blocks/audit-timeline/manifest.ts",
-        "src/blocks/types.ts"
+        "src/blocks/audit-timeline/manifest.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
@@ -228,11 +200,9 @@
       "version": "1.0.0",
       "files": [
         "src/blocks/_shared/format.tsx",
-        "src/blocks/_shared/schema.ts",
         "src/blocks/comments/CommentBox.tsx",
         "src/blocks/comments/Comments.tsx",
-        "src/blocks/comments/manifest.ts",
-        "src/blocks/types.ts"
+        "src/blocks/comments/manifest.ts"
       ],
       "platform": [
         "src/connectors/external.ts",
@@ -257,7 +227,7 @@
         "audit-timeline": "1.0.0",
         "comments": "1.0.0",
         "data-grid": "1.0.0",
-        "metric-cards": "1.0.0",
+        "metric-cards": "1.0.1",
         "record-detail": "1.0.0",
         "review-queue": "2.0.0"
       },
@@ -268,11 +238,11 @@
     "refunds": {
       "blocks": {
         "audit-timeline": "1.0.0",
-        "chart": "1.0.0",
+        "chart": "1.0.1",
         "comments": "1.0.0",
         "data-grid": "1.0.0",
         "form": "1.0.0",
-        "metric-cards": "1.0.0",
+        "metric-cards": "1.0.1",
         "record-detail": "1.0.0"
       },
       "sources": [
@@ -293,10 +263,10 @@
     "chargeback-disputes": {
       "blocks": {
         "audit-timeline": "1.0.0",
-        "chart": "1.0.0",
+        "chart": "1.0.1",
         "comments": "1.0.0",
         "data-grid": "1.0.0",
-        "metric-cards": "1.0.0",
+        "metric-cards": "1.0.1",
         "record-detail": "1.0.0",
         "review-queue": "2.0.0"
       },

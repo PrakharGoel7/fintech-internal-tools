@@ -3,16 +3,7 @@ import { getSource } from "@/connectors";
 import type { BlockProps } from "../types";
 import type { configSchema } from "./manifest";
 import { formatPlain } from "../_shared/format";
-
-export function aggregate(rows: Record<string, unknown>[], agg: string, field?: string) {
-  if (agg === "count") return rows.length;
-  const vals = rows.map((r) => Number(r[field!])).filter((n) => !Number.isNaN(n));
-  if (!vals.length) return 0;
-  if (agg === "sum") return vals.reduce((a, b) => a + b, 0);
-  if (agg === "avg") return vals.reduce((a, b) => a + b, 0) / vals.length;
-  if (agg === "max") return Math.max(...vals);
-  return Math.min(...vals);
-}
+import { aggregate } from "../_shared/aggregate";
 
 const TONE = { neutral: "text-slate-900", good: "text-emerald-600", warn: "text-amber-600", bad: "text-rose-600" };
 
