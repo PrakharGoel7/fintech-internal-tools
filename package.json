@@ -14,6 +14,8 @@
     "catalog": "tsx scripts/catalog.ts",
     "validate-apps": "tsx scripts/validate-apps.ts",
     "boundaries": "tsx scripts/check-boundaries.ts",
+    "scenarios": "tsx scripts/scenarios.ts",
+    "smoke": "tsx scripts/smoke.ts",
     "check": "npm run typecheck && npm run lint && npm run boundaries && npm run validate-apps && npm run catalog -- --check && npm test"
   },
   "dependencies": {

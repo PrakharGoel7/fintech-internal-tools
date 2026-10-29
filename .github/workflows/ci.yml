@@ -10,3 +10,4 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm run seed && npm run build
+      - run: (npm start -- -p 3000 &) && npm run smoke

@@ -29,7 +29,7 @@ Approvals needed: ${req.approvals || "none stated"}
 Sensitive data: ${req.sensitive.join(", ") || "none stated"}
 Urgency: ${req.urgency}
 
-Start with Phase 1 (spec + gap analysis) and post the spec for approval before building.`;
+Start with Phase 1 (spec + gap analysis). Include the plain-language "Scenarios to confirm" and yes/no questions for the requester, and post the spec for approval before building. Confirmed scenarios become the app's automated tests.`;
 }
 
 export async function submitAppRequest(user: User, req: AppRequestInput) {

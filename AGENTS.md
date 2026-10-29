@@ -24,7 +24,7 @@ This repo is an internal-tools platform. Apps are **config files composed from r
 
 ## Before opening a PR
 ```
-npm run check   # typecheck, lint, boundaries, validate-apps, catalog freshness, tests
+npm run check   # typecheck, lint, boundaries, validate-apps, catalog freshness, tests (incl. every app's src/apps/<slug>/scenarios.ts)
 npm run build
 ```
 Regenerate `catalog.json` with `npm run catalog` whenever blocks/connectors/apps change.
