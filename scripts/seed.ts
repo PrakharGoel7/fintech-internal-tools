@@ -3,6 +3,8 @@ import path from "node:path";
 import { getDb } from "@/platform/db";
 import "@/connectors";
 import { audit } from "@/platform/audit";
+import { runAction, getUser } from "@/platform";
+import { getApp } from "@/apps/registry";
 
 /** Deterministic synthetic data. Never seed real customer data. */
 let s = 42;
@@ -78,5 +80,30 @@ for (let i = 1; i <= DISPUTES; i++) {
     status === "won" ? 100 : status === "lost" ? 0 : null, created, created);
 }
 
-audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES } });
-console.log(`Seeded ${file}`);
+const ACCOUNTS = 36;
+const daysAhead = (d: number) => new Date(Date.now() + d * 86400000).toISOString().slice(0, 10);
+const acct = db.prepare(`INSERT INTO customer_accounts VALUES (?,?,?,?,?,?,?,?,?)`);
+for (let i = 1; i <= ACCOUNTS; i++) {
+  const n = name();
+  const limit = pick([2500, 5000, 5000, 10000, 15000]);
+  const status = i <= 8 ? "active" : i <= 11 ? "expired" : i <= 13 ? "rejected" : "none";
+  const override = status === "none" || status === "rejected" ? null : i % 3 === 0 ? int(26, 60) * 1000 : limit + int(1, 10) * 1000;
+  const expiry = status === "active" ? daysAhead(int(1, 30)) : status === "expired" ? daysAhead(-int(1, 40)) : null;
+  const created = daysAgo(int(60, 900));
+  acct.run(`acct_${100200 + i * 17}`, n, email(n), limit, override, expiry, status, created, daysAgo(int(0, 30)));
+}
+
+/** Two pending override requests filed through the real action pipeline (one needs Compliance). */
+async function seedOverrideRequests() {
+  const app = getApp("limit-overrides");
+  const sam = getUser("sam");
+  const ids = (db.prepare("SELECT id FROM customer_accounts WHERE override_status = 'none' ORDER BY id LIMIT 2").all() as { id: string }[]).map((r) => r.id);
+  const requests: [number, string, string][] = [[18000, "property_closing", "Closing on a house Friday; title company wire."], [40000, "business_payment", "Quarterly supplier payment, invoice on file."]];
+  for (const [i, [limit, reason, note]] of requests.entries())
+    await runAction({ user: sam, app, actionId: "requestOverride", recordId: ids[i], reason, note, input: { override_limit: limit, override_expiry: daysAhead(7 + i * 7) } });
+}
+
+seedOverrideRequests().then(() => {
+  audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES, customer_accounts: ACCOUNTS } });
+  console.log(`Seeded ${file}`);
+});

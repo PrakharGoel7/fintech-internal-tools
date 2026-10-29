@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { ROLES, type User } from "./users";
-import { conditionsSchema } from "./conditions";
+import { conditionsSchema, matches } from "./conditions";
 
 const roleSchema = z.enum(ROLES);
 const scalar = z.union([z.string(), z.number(), z.boolean(), z.null()]);
@@ -19,6 +19,22 @@ export const effectSchema = z.discriminatedUnion("kind", [
 ]);
 export type Effect = z.infer<typeof effectSchema>;
 
+export const approvalRuleSchema = z.object({
+  when: conditionsSchema,
+  approverRoles: z.array(roleSchema).min(1),
+  description: z.string().optional(),
+});
+export type ApprovalRule = z.infer<typeof approvalRuleSchema>;
+
+/** A value collected in the action dialog and passed to the effect as `input`. */
+export const actionInputSchema = z.object({
+  field: z.string(),
+  label: z.string(),
+  type: z.enum(["text", "textarea", "number", "date"]).default("text"),
+  required: z.boolean().default(true),
+});
+export type ActionInput = z.infer<typeof actionInputSchema>;
+
 export const actionSchema = z.object({
   label: z.string(),
   source: z.string(),
@@ -29,17 +45,30 @@ export const actionSchema = z.object({
   requireNote: z.boolean().optional(),
   /** The action is only offered/allowed when the record matches. */
   availableWhen: conditionsSchema.optional(),
-  /** Maker-checker: if the record matches `when`, a second person must approve. */
-  approval: z
-    .object({
-      when: conditionsSchema,
-      approverRoles: z.array(roleSchema).min(1),
-      description: z.string().optional(),
-    })
-    .optional(),
+  /** Typed inputs collected in the action dialog. When set, only these fields are accepted as `input`. */
+  inputs: z.array(actionInputSchema).optional(),
+  /**
+   * Maker-checker: if the record (merged with `input`) matches `when`, a second person must approve.
+   * A list of rules is evaluated in order; the first match wins.
+   */
+  approval: z.union([approvalRuleSchema, z.array(approvalRuleSchema).min(1)]).optional(),
+  /** Record field updated by `pendingStatus` / `rejectedStatus`. */
+  statusField: z.string().default("status"),
+  /** Set on the record while its approval is pending. */
+  pendingStatus: z.string().optional(),
+  /** Set on the record when its approval is rejected. */
+  rejectedStatus: z.string().optional(),
   variant: z.enum(["default", "primary", "danger"]).default("default"),
 });
 export type ActionDef = z.infer<typeof actionSchema>;
+
+export function approvalRules(action: Pick<ActionDef, "approval">): ApprovalRule[] {
+  return !action.approval ? [] : Array.isArray(action.approval) ? action.approval : [action.approval];
+}
+
+export function matchApproval(action: Pick<ActionDef, "approval">, subject: Record<string, unknown>): ApprovalRule | null {
+  return approvalRules(action).find((r) => matches(r.when, subject)) ?? null;
+}
 
 export const blockInstanceSchema = z.object({
   type: z.string(),

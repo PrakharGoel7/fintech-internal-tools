@@ -4,7 +4,7 @@ import { audit } from "./audit";
 import { assertCan, ForbiddenError } from "./rbac";
 import { matches, describeConditions } from "./conditions";
 import { maskRow } from "./pii";
-import type { AppModule, ActionDef, Effect } from "./app-definition";
+import { matchApproval, type AppModule, type ActionDef, type Effect } from "./app-definition";
 import type { User } from "./users";
 import { getSource, externalConnectors } from "@/connectors";
 
@@ -80,6 +80,37 @@ async function executeEffect(app: AppModule, action: ActionDef, effect: Effect, 
   return { recordId: recordId!, before, after };
 }
 
+/** Keep only declared inputs, enforce `required` and coerce by type. Actions without `inputs` pass input through. */
+export function parseInputs(action: ActionDef, raw: Row): Row {
+  if (!action.inputs) return raw;
+  const out: Row = {};
+  for (const f of action.inputs) {
+    const v = raw[f.field];
+    const empty = v === undefined || v === null || String(v).trim() === "";
+    if (empty) {
+      if (f.required) throw new ActionError(`${f.label} is required`);
+      continue;
+    }
+    if (f.type === "number") {
+      const n = Number(v);
+      if (!Number.isFinite(n)) throw new ActionError(`${f.label} must be a number`);
+      out[f.field] = n;
+    } else if (f.type === "date") {
+      const d = String(v).trim();
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(d) || Number.isNaN(Date.parse(d))) throw new ActionError(`${f.label} must be a date (YYYY-MM-DD)`);
+      out[f.field] = d;
+    } else out[f.field] = String(v).trim();
+  }
+  return out;
+}
+
+function setStatus(action: ActionDef, sourceName: string, recordId: string, value: string) {
+  const source = getSource(sourceName);
+  const before = source.getRaw(recordId);
+  const after = source.update(recordId, { [action.statusField]: value, updated_at: new Date().toISOString() });
+  return diff(before, after, source.def.piiFields);
+}
+
 /**
  * The single mutation pipeline for every app:
  * RBAC → reason code → availability guard → idempotency → maker-checker → execute → audit.
@@ -107,21 +138,23 @@ export async function runAction(req: RunActionInput): Promise<ActionResult> {
   if (record && !matches(action.availableWhen, record)) {
     throw new ActionError(`"${action.label}" is not available for this record (${describeConditions(action.availableWhen)})`);
   }
-  const input = req.input ?? {};
+  const input = parseInputs(action, req.input ?? {});
   const subject = { ...(record ?? {}), ...input };
 
   let result: ActionResult;
-  if (action.approval && matches(action.approval.when, subject)) {
+  const approvalRule = matchApproval(action, subject);
+  if (approvalRule) {
     const approvalId = `apr_${crypto.randomBytes(5).toString("hex")}`;
-    const rule = action.approval.description ?? describeConditions(action.approval.when);
+    const rule = approvalRule.description ?? describeConditions(approvalRule.when);
     db.prepare(
       `INSERT INTO approvals (id, ts, app, action_id, source, record_id, input, reason, note, rule, requested_by, approver_roles, status)
        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending')`,
     ).run(approvalId, new Date().toISOString(), app.slug, actionId, action.source, recordId,
-      JSON.stringify(input), req.reason ?? null, req.note ?? null, rule, user.id, JSON.stringify(action.approval.approverRoles));
+      JSON.stringify(input), req.reason ?? null, req.note ?? null, rule, user.id, JSON.stringify(approvalRule.approverRoles));
+    const changes = recordId && action.pendingStatus ? setStatus(action, action.source, recordId, action.pendingStatus) : undefined;
     audit({
       actor: user.id, app: app.slug, action: "approval.requested", source: action.source, recordId,
-      reason: req.reason, details: { approvalId, action: actionId, rule, note: req.note ?? null, input: maskRow(input, source.def.piiFields) },
+      reason: req.reason, details: { approvalId, action: actionId, rule, note: req.note ?? null, input: maskRow(input, source.def.piiFields), ...(changes && { changes }) },
     });
     result = { status: "pending_approval", approvalId, rule };
   } else {
@@ -173,15 +206,19 @@ export async function decideApproval(opts: {
   const check = canDecide(opts.user, a);
   if (!check.ok) throw new ForbiddenError(check.why!);
   const now = new Date().toISOString();
-  if (opts.decision === "reject") {
-    db.prepare("UPDATE approvals SET status='rejected', decided_by=?, decided_at=?, decision_note=? WHERE id=?").run(opts.user.id, now, opts.note ?? null, a.id);
-    audit({ actor: opts.user.id, app: a.app, action: "approval.rejected", source: a.source, recordId: a.record_id, details: { approvalId: a.id, requestedBy: a.requested_by, note: opts.note ?? null } });
-    return { status: "rejected" as const };
-  }
   const app = opts.getApp(a.app);
   const action = app.actions[a.action_id];
   const record = a.record_id ? getSource(a.source).getRaw(a.record_id) : null;
-  if (record && !matches(action.availableWhen, record)) {
+  /** With `pendingStatus`, the record must still be in that status; otherwise the availability guard is re-checked. */
+  const stillPending = action.pendingStatus ? record?.[action.statusField] === action.pendingStatus : matches(action.availableWhen, record ?? {});
+  if (opts.decision === "reject") {
+    db.prepare("UPDATE approvals SET status='rejected', decided_by=?, decided_at=?, decision_note=? WHERE id=?").run(opts.user.id, now, opts.note ?? null, a.id);
+    const changes = a.record_id && action.rejectedStatus && action.pendingStatus && stillPending
+      ? setStatus(action, a.source, a.record_id, action.rejectedStatus) : undefined;
+    audit({ actor: opts.user.id, app: a.app, action: "approval.rejected", source: a.source, recordId: a.record_id, details: { approvalId: a.id, requestedBy: a.requested_by, note: opts.note ?? null, ...(changes && { changes }) } });
+    return { status: "rejected" as const };
+  }
+  if (record && !stillPending) {
     db.prepare("UPDATE approvals SET status='failed', decided_by=?, decided_at=?, decision_note=? WHERE id=?").run(opts.user.id, now, "Record changed; action no longer applicable", a.id);
     throw new ActionError("Record changed since the request; action is no longer applicable");
   }

@@ -20,6 +20,7 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [note, setNote] = useState("");
+  const [values, setValues] = useState<Record<string, string>>({});
   const [busy, setBusy] = useState(false);
   const [key, setKey] = useState("");
   const pad = size === "xs" ? "px-2 py-1 text-xs" : "px-3 py-1.5 text-sm";
@@ -34,11 +35,12 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
 
   async function submit() {
     setBusy(true);
-    const res = await runActionAction({ appSlug, actionId: meta.id, recordId, reason: reason || null, note: note || null, input, idempotencyKey: key });
+    const merged = meta.inputs.length ? { ...input, ...values } : input;
+    const res = await runActionAction({ appSlug, actionId: meta.id, recordId, reason: reason || null, note: note || null, input: merged, idempotencyKey: key });
     setBusy(false);
     if (!res.ok) { toast(res.message, "error"); return; }
     toast(res.message, res.pending ? "info" : "success");
-    setOpen(false); setReason(""); setNote("");
+    setOpen(false); setReason(""); setNote(""); setValues({});
     onDone?.();
     router.refresh();
   }
@@ -53,11 +55,29 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
           <div className="w-full max-w-md rounded-xl bg-white p-5 text-left shadow-xl" onClick={(e) => e.stopPropagation()}>
             <h3 className="text-base font-semibold text-slate-900">{meta.label}</h3>
             {recordId && <p className="mt-0.5 font-mono text-xs text-slate-500">{recordId}</p>}
-            {meta.approvalRule && (
+            {meta.approvals.length === 1 && (
               <div className="mt-3 rounded-md border border-orange-200 bg-orange-50 p-2.5 text-xs text-orange-800">
-                <b>Maker-checker:</b> {meta.approvalRule}. This will be sent to <b>{meta.approverRoles.join(" / ")}</b> for approval before it executes.
+                <b>Maker-checker:</b> {meta.approvals[0].rule}. This will be sent to <b>{meta.approvals[0].approverRoles.join(" / ")}</b> for approval before it executes.
               </div>
             )}
+            {meta.approvals.length > 1 && (
+              <div className="mt-3 rounded-md border border-orange-200 bg-orange-50 p-2.5 text-xs text-orange-800">
+                <b>Maker-checker:</b> this will be sent for approval before it executes. The first matching rule applies:
+                <ul className="mt-1 list-disc pl-4">
+                  {meta.approvals.map((a) => <li key={a.rule}>{a.rule} → <b>{a.approverRoles.join(" / ")}</b></li>)}
+                </ul>
+              </div>
+            )}
+            {meta.inputs.map((f) => (
+              <label key={f.field} className="mt-3 block text-sm font-medium text-slate-700">
+                {f.label} {f.required && <span className="text-rose-600">*</span>}
+                {f.type === "textarea" ? (
+                  <textarea rows={2} value={values[f.field] ?? ""} onChange={(e) => setValues({ ...values, [f.field]: e.target.value })} className="mt-1 block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                ) : (
+                  <input type={f.type} value={values[f.field] ?? ""} onChange={(e) => setValues({ ...values, [f.field]: e.target.value })} className="mt-1 block w-full rounded-md border border-slate-300 px-2 py-1.5 text-sm" />
+                )}
+              </label>
+            ))}
             {meta.reasonCodes.length > 0 && (
               <label className="mt-4 block text-sm font-medium text-slate-700">
                 Reason code <span className="text-rose-600">*</span>
@@ -75,9 +95,9 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setOpen(false)} disabled={busy} className="rounded-md border border-slate-300 px-3 py-1.5 text-sm">Cancel</button>
               <button onClick={submit}
-                disabled={busy || (meta.reasonCodes.length > 0 && !reason) || (meta.requireNote && !note.trim())}
+                disabled={busy || (meta.reasonCodes.length > 0 && !reason) || (meta.requireNote && !note.trim()) || meta.inputs.some((f) => f.required && !values[f.field]?.trim())}
                 className={`rounded-md px-3 py-1.5 text-sm font-medium disabled:opacity-50 ${VARIANT[meta.variant === "default" ? "primary" : meta.variant]}`}>
-                {busy ? "Working…" : meta.approvalRule ? "Submit for approval" : "Confirm"}
+                {busy ? "Working…" : meta.approvals.length ? "Submit for approval" : "Confirm"}
               </button>
             </div>
           </div>

@@ -58,7 +58,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "limit-overrides"
       ],
       "configSchema": {
         "type": "object",
@@ -269,7 +270,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "limit-overrides"
       ],
       "configSchema": {
         "type": "object",
@@ -759,7 +761,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "limit-overrides"
       ],
       "configSchema": {
         "type": "object",
@@ -1258,7 +1261,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "limit-overrides"
       ],
       "configSchema": {
         "type": "object",
@@ -1317,7 +1321,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "limit-overrides"
       ],
       "configSchema": {
         "type": "object",
@@ -1588,6 +1593,59 @@
             "type": "date"
           }
         }
+      },
+      {
+        "name": "customer_accounts",
+        "pk": "id",
+        "piiFields": [
+          "customer_name",
+          "email"
+        ],
+        "fields": {
+          "id": {
+            "label": "Account",
+            "type": "text"
+          },
+          "customer_name": {
+            "label": "Customer",
+            "type": "text"
+          },
+          "email": {
+            "label": "Email",
+            "type": "text"
+          },
+          "daily_limit": {
+            "label": "Daily limit",
+            "type": "currency"
+          },
+          "override_limit": {
+            "label": "Override limit",
+            "type": "currency"
+          },
+          "override_expiry": {
+            "label": "Override expires",
+            "type": "date"
+          },
+          "override_status": {
+            "label": "Override",
+            "type": "status",
+            "tones": {
+              "none": "neutral",
+              "requested": "warn",
+              "active": "good",
+              "expired": "neutral",
+              "rejected": "bad"
+            }
+          },
+          "created_at": {
+            "label": "Opened",
+            "type": "date"
+          },
+          "updated_at": {
+            "label": "Updated",
+            "type": "date"
+          }
+        }
       }
     ],
     "external": {
@@ -1598,6 +1656,10 @@
       ],
       "kycVendor": [
         "rescreen"
+      ],
+      "coreBanking": [
+        "applyLimitOverride",
+        "revokeLimitOverride"
       ]
     }
   },
@@ -1695,6 +1757,30 @@
         "metric-cards",
         "review-queue",
         "chart",
+        "data-grid",
+        "record-detail",
+        "audit-timeline",
+        "comments"
+      ]
+    },
+    {
+      "slug": "limit-overrides",
+      "name": "Customer Limit Overrides",
+      "permissions": [
+        "view",
+        "request",
+        "revoke",
+        "pii.reveal",
+        "comment",
+        "export"
+      ],
+      "actions": [
+        "requestOverride",
+        "revokeOverride",
+        "expireOverride"
+      ],
+      "blocks": [
+        "metric-cards",
         "data-grid",
         "record-detail",
         "audit-timeline",

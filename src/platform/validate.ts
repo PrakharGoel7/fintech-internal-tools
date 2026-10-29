@@ -1,7 +1,7 @@
 import { manifests } from "@/blocks/manifests";
 import { sources } from "@/connectors";
 import { externalConnectors } from "@/connectors/external";
-import type { AppModule } from "./app-definition";
+import { approvalRules, type AppModule } from "./app-definition";
 import { ROLES } from "./users";
 
 /** Static checks that go beyond the zod schema: references between actions, blocks, sources, roles, handlers. */
@@ -16,10 +16,14 @@ export function validateApp(app: AppModule): string[] {
     if (!app.permissions[a.permission]) errs.push(`action ${id}: permission "${a.permission}" not declared in app.permissions`);
     if (a.effect.kind === "connector" && !externalConnectors[a.effect.connector]?.[a.effect.op]) errs.push(`action ${id}: unknown connector op ${a.effect.connector}.${a.effect.op}`);
     if (a.effect.kind === "handler" && !app.handlers?.[a.effect.name]) errs.push(`action ${id}: handler "${a.effect.name}" not defined`);
-    if (a.approval) for (const r of a.approval.approverRoles) if (!roles.has(r)) errs.push(`action ${id}: unknown approver role "${r}"`);
+    const rules = approvalRules(a);
+    for (const rule of rules) for (const r of rule.approverRoles) if (!roles.has(r)) errs.push(`action ${id}: unknown approver role "${r}"`);
     const fields = sources[a.source]?.def.fields ?? {};
-    for (const c of [...(a.availableWhen ?? []), ...(a.approval?.when ?? [])])
+    for (const c of [...(a.availableWhen ?? []), ...rules.flatMap((r) => r.when)])
       if (sources[a.source] && !fields[c.field]) errs.push(`action ${id}: condition on unknown field "${c.field}"`);
+    if ((a.pendingStatus || a.rejectedStatus) && !rules.length) errs.push(`action ${id}: pendingStatus/rejectedStatus require an approval rule`);
+    if (a.rejectedStatus && !a.pendingStatus) errs.push(`action ${id}: rejectedStatus requires pendingStatus`);
+    if ((a.pendingStatus || a.rejectedStatus) && sources[a.source] && !fields[a.statusField]) errs.push(`action ${id}: statusField "${a.statusField}" is not a field of "${a.source}"`);
   }
 
   const seenPaths = new Set<string>();

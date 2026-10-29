@@ -101,6 +101,27 @@ const defs: SourceDef[] = [
       updated_at: { label: "Updated", type: "date" },
     },
   },
+  {
+    name: "customer_accounts",
+    table: "customer_accounts",
+    label: "Customer account",
+    pk: "id",
+    titleField: "id",
+    piiFields: ["customer_name", "email"],
+    searchFields: ["id"],
+    defaultSort: { field: "id", dir: "asc" },
+    fields: {
+      id: { label: "Account", type: "text" },
+      customer_name: { label: "Customer", type: "text" },
+      email: { label: "Email", type: "text" },
+      daily_limit: { label: "Daily limit", type: "currency" },
+      override_limit: { label: "Override limit", type: "currency" },
+      override_expiry: { label: "Override expires", type: "date" },
+      override_status: { label: "Override", type: "status", tones: { none: "neutral", requested: "warn", active: "good", expired: "neutral", rejected: "bad" } },
+      created_at: { label: "Opened", type: "date" },
+      updated_at: { label: "Updated", type: "date" },
+    },
+  },
 ];
 
 export const sources: Record<string, TableSource> = Object.fromEntries(defs.map((d) => [d.name, new TableSource(d)]));
