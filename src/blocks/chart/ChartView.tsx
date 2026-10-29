@@ -1,5 +1,5 @@
 "use client";
-import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, LineChart, Line, PieChart, Pie, Cell, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 
 const COLORS = ["#4f46e5", "#0ea5e9", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#64748b"];
 
@@ -10,10 +10,11 @@ export function ChartView({ kind, data, currency }: { kind: "bar" | "line" | "pi
       <ResponsiveContainer width="100%" height="100%">
         {kind === "pie" ? (
           <PieChart>
-            <Pie data={data} dataKey="value" nameKey="name" outerRadius={80} isAnimationActive={false} label={(e) => String(e.name ?? "").replace(/_/g, " ")}>
+            <Pie data={data} dataKey="value" nameKey="name" outerRadius={80} isAnimationActive={false}>
               {data.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
             </Pie>
             <Tooltip formatter={(v) => fmt(Number(v))} />
+            <Legend iconSize={10} wrapperStyle={{ fontSize: 12 }} formatter={(v) => String(v).replace(/_/g, " ")} />
           </PieChart>
         ) : kind === "line" ? (
           <LineChart data={data}>
