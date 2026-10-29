@@ -15,8 +15,9 @@ export interface AppRequestInput {
 }
 
 /** The prompt handed to Devin. It deliberately points at the repo skill so behaviour lives in version control. */
-export function buildDevinPrompt(req: AppRequestInput, requester: User, repo: string) {
-  return `Use the build-internal-app skill in ${repo} (.agents/skills/build-internal-app/SKILL.md) to handle this internal app request.
+export function buildDevinPrompt(req: AppRequestInput, requester: User, repo: string, baseBranch = process.env.APP_BASE_BRANCH) {
+  const branch = baseBranch ? ` on branch ${baseBranch} (base your work and PR on it)` : "";
+  return `Use the build-internal-app skill in ${repo}${branch} (.agents/skills/build-internal-app/SKILL.md) to handle this internal app request.
 
 Requested by: ${requester.name} (${requester.title})
 Title: ${req.title}
@@ -29,7 +30,7 @@ Approvals needed: ${req.approvals || "none stated"}
 Sensitive data: ${req.sensitive.join(", ") || "none stated"}
 Urgency: ${req.urgency}
 
-Start with Phase 1 (spec + gap analysis) and post the spec for approval before building.`;
+Start with Phase 1 (spec + gap analysis). Include the plain-language "Scenarios to confirm" and yes/no questions for the requester, and post the spec for approval before building. Confirmed scenarios become the app's automated tests.`;
 }
 
 export async function submitAppRequest(user: User, req: AppRequestInput) {
