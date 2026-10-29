@@ -21,6 +21,7 @@ This repo is an internal-tools platform. Apps are **config files composed from r
 6. When a need isn't covered by any block, build it app-locally (handler) and add a row to `GAPS.md`. Second occurrence → propose extraction. Third occurrence, or anything compliance-critical → new block.
 
 7. **Blocks and the platform stay domain-agnostic.** No source names, field names, thresholds or status vocabulary in `src/platform/`, `src/blocks/` (outside manifest examples) or portal routes. Put them in app config (e.g. `review-queue.badges`, approval `when`) or the `SourceDef` (`fields[x].tones`). A block option is justified only if a second app could plausibly use it with different values. `npm run boundaries` rejects source names in shared code.
+8. **Style with the shared design tokens.** Use the classes and colours in `src/app/globals.css` (`card`, `card-title`, `eyebrow`, `btn btn-sm btn-primary|secondary|danger`, `input`, `badge` + `TONE_CLS`, `table-head`, `chip`, `link`, `brand-*`). Don't hard-code new palettes or one-off button/card styles in blocks or apps; restyle the portal by editing the tokens.
 
 ## Before opening a PR
 ```

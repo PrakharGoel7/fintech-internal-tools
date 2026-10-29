@@ -12,24 +12,24 @@ export function ToggleMatrix({ config, ctx, title }: BlockProps<z.infer<typeof c
   const rows = source.list();
   const extra = resolveColumns(config.extraFields, source.def);
   return (
-    <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-800">{title ?? `${source.def.label}s`}</div>
+    <div className="card overflow-hidden">
+      <div className="card-title border-b border-slate-100 px-4 py-3">{title ?? `${source.def.label}s`}</div>
       <table className="min-w-full text-sm">
-        <thead className="bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
+        <thead className="table-head border-b border-slate-100">
           <tr>
-            <th className="px-4 py-2 font-medium">{source.def.fields[config.labelField]?.label ?? config.labelField}</th>
-            {config.extraFields.map((f) => <th key={f} className="px-4 py-2 font-medium">{source.def.fields[f]?.label ?? f}</th>)}
-            {config.columns.map((c) => <th key={c.field} className="px-4 py-2 text-center font-medium">{c.label}</th>)}
+            <th className="px-4 py-2.5">{source.def.fields[config.labelField]?.label ?? config.labelField}</th>
+            {config.extraFields.map((f) => <th key={f} className="px-4 py-2.5">{source.def.fields[f]?.label ?? f}</th>)}
+            {config.columns.map((c) => <th key={c.field} className="px-4 py-2.5 text-center">{c.label}</th>)}
           </tr>
         </thead>
         <tbody className="divide-y divide-slate-100">
           {rows.map((r) => {
             const id = String(r[source.def.pk]);
             return (
-              <tr key={id}>
+              <tr key={id} className="transition-colors hover:bg-slate-50/80">
                 <td className="px-4 py-2.5">
                   {config.rowLink
-                    ? <Link href={`${ctx.basePath}/${config.rowLink.replace(":id", id)}`} className="font-mono text-sm font-medium text-indigo-600 hover:underline">{String(r[config.labelField])}</Link>
+                    ? <Link href={`${ctx.basePath}/${config.rowLink.replace(":id", id)}`} className="link font-mono text-sm">{String(r[config.labelField])}</Link>
                     : <span className="font-mono text-sm font-medium">{String(r[config.labelField])}</span>}
                   {config.descriptionField && <div className="text-xs text-slate-500">{String(r[config.descriptionField])}</div>}
                 </td>
@@ -38,7 +38,12 @@ export function ToggleMatrix({ config, ctx, title }: BlockProps<z.infer<typeof c
                   const on = Number(r[c.field]) === 1;
                   const m = actionMeta(ctx, c.action, r);
                   const pill = (
-                    <span className={`inline-flex w-14 items-center justify-center rounded-full px-2 py-1 text-xs font-semibold ${on ? "bg-emerald-500 text-white" : "bg-slate-200 text-slate-600"}`}>{on ? "ON" : "OFF"}</span>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-slate-500">
+                      <span className={`relative inline-flex h-5 w-9 flex-none rounded-full transition-colors ${on ? "bg-emerald-500" : "bg-slate-300"}`}>
+                        <span className={`absolute top-0.5 h-4 w-4 rounded-full bg-white shadow-sm transition-all ${on ? "left-[18px]" : "left-0.5"}`} />
+                      </span>
+                      <span className={`w-6 text-left ${on ? "text-emerald-700" : ""}`}>{on ? "On" : "Off"}</span>
+                    </span>
                   );
                   return (
                     <td key={c.field} className="px-4 py-2.5 text-center">

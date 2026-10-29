@@ -7,9 +7,9 @@ export function VerifyChain() {
   return (
     <div className="flex items-center gap-3">
       {r && (r.ok
-        ? <span className="text-sm text-emerald-700">✓ Chain intact ({r.checked} entries)</span>
-        : <span className="text-sm font-semibold text-rose-700">✗ Tampering detected at entry #{r.brokenAt}</span>)}
-      <button onClick={async () => setR(await verifyAuditAction())} className="rounded-md border border-slate-300 bg-white px-3 py-1.5 text-sm font-medium hover:bg-slate-50">Verify integrity</button>
+        ? <span className="badge bg-emerald-50 text-sm text-emerald-700 ring-emerald-600/20">✓ Chain intact ({r.checked} entries)</span>
+        : <span className="badge bg-rose-50 text-sm font-semibold text-rose-700 ring-rose-600/20">✗ Tampering detected at entry #{r.brokenAt}</span>)}
+      <button onClick={async () => setR(await verifyAuditAction())} className="btn btn-sm btn-secondary">Verify integrity</button>
     </div>
   );
 }

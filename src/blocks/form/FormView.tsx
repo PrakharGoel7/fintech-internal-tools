@@ -9,7 +9,7 @@ export function FormView({ appSlug, meta, fields, submitLabel }: { appSlug: stri
   const [values, setValues] = useState<Record<string, string>>({});
   const missing = fields.some((f) => f.required && !values[f.name]?.trim());
   const input = Object.fromEntries(fields.map((f) => [f.name, f.type === "number" ? Number(values[f.name] ?? 0) : values[f.name] ?? ""]));
-  const cls = "mt-1 block w-full rounded-md border border-slate-300 px-2.5 py-1.5 text-sm";
+  const cls = "input mt-1 block w-full font-normal";
   return (
     <div className="mt-4 space-y-3">
       {fields.map((f) => (

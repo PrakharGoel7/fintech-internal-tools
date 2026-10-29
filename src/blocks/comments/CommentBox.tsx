@@ -14,8 +14,8 @@ export function CommentBox({ appSlug, source, recordId }: { appSlug: string; sou
       if (!r.ok) return toast(r.message, "error");
       setBody(""); router.refresh();
     }}>
-      <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Add a note…" className="flex-1 rounded-md border border-slate-300 px-2.5 py-1.5 text-sm" />
-      <button disabled={!body.trim()} className="rounded-md bg-slate-800 px-3 py-1.5 text-sm font-medium text-white disabled:opacity-40">Post</button>
+      <input value={body} onChange={(e) => setBody(e.target.value)} placeholder="Add a note…" className="input flex-1" />
+      <button disabled={!body.trim()} className="btn btn-sm btn-dark">Post</button>
     </form>
   );
 }

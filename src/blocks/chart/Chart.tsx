@@ -17,8 +17,8 @@ export function Chart({ config, title }: BlockProps<z.infer<typeof configSchema>
     .map(([name, rs]) => ({ name, value: Math.round(aggregate(rs, config.agg, config.field) * 100) / 100 }))
     .sort((a, b) => (config.bucket === "day" ? a.name.localeCompare(b.name) : b.value - a.value));
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
-      <h3 className="mb-2 text-sm font-semibold text-slate-800">{title ?? config.groupBy}</h3>
+    <div className="card p-4">
+      <h3 className="card-title mb-2">{title ?? config.groupBy}</h3>
       <ChartView kind={config.kind} data={data} currency={config.currency} />
     </div>
   );

@@ -10,12 +10,12 @@ export function slaState(iso: string, sla: SlaConfig, now = Date.now()) {
   const t = new Date(iso).getTime();
   if (sla.mode === "deadline") {
     const left = (t - now) / 3600000;
-    if (left < 0) return { label: `Overdue ${fmt(-left)}`, cls: "bg-rose-100 text-rose-700" };
-    if (left < sla.hours) return { label: `${fmt(left)} left`, cls: "bg-amber-100 text-amber-800" };
-    return { label: `${fmt(left)} left`, cls: "bg-slate-100 text-slate-600" };
+    if (left < 0) return { label: `Overdue ${fmt(-left)}`, cls: "bg-rose-50 text-rose-700 ring-rose-600/20" };
+    if (left < sla.hours) return { label: `${fmt(left)} left`, cls: "bg-amber-50 text-amber-800 ring-amber-600/25" };
+    return { label: `${fmt(left)} left`, cls: "bg-slate-50 text-slate-600 ring-slate-500/20" };
   }
   const left = sla.hours - (now - t) / 3600000;
-  if (left < 0) return { label: `SLA breached ${Math.round(-left)}h`, cls: "bg-rose-100 text-rose-700" };
-  if (left < sla.hours * 0.25) return { label: `${Math.round(left)}h left`, cls: "bg-amber-100 text-amber-800" };
-  return { label: `${Math.round(left)}h left`, cls: "bg-slate-100 text-slate-600" };
+  if (left < 0) return { label: `SLA breached ${Math.round(-left)}h`, cls: "bg-rose-50 text-rose-700 ring-rose-600/20" };
+  if (left < sla.hours * 0.25) return { label: `${Math.round(left)}h left`, cls: "bg-amber-50 text-amber-800 ring-amber-600/25" };
+  return { label: `${Math.round(left)}h left`, cls: "bg-slate-50 text-slate-600 ring-slate-500/20" };
 }

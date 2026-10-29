@@ -16,11 +16,11 @@ export function GridToolbar({ searchable, filters }: { searchable: boolean; filt
     <div className="flex flex-wrap items-center gap-2">
       {searchable && (
         <form onSubmit={(e) => { e.preventDefault(); set("q", q); }}>
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="w-44 rounded-md border border-slate-300 px-2.5 py-1.5 text-xs" />
+          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search…" className="input w-44 text-xs" />
         </form>
       )}
       {filters.map((f) => (
-        <select key={f.field} value={sp.get(`f_${f.field}`) ?? ""} onChange={(e) => set(`f_${f.field}`, e.target.value)} className="rounded-md border border-slate-300 px-2 py-1.5 text-xs">
+        <select key={f.field} value={sp.get(`f_${f.field}`) ?? ""} onChange={(e) => set(`f_${f.field}`, e.target.value)} className="input text-xs">
           <option value="">{f.label}: all</option>
           {f.options.map((o) => <option key={o} value={o}>{o.replace(/_/g, " ")}</option>)}
         </select>
