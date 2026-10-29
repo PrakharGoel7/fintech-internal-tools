@@ -58,7 +58,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "merchant-onboarding"
       ],
       "configSchema": {
         "type": "object",
@@ -269,7 +270,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "merchant-onboarding"
       ],
       "configSchema": {
         "type": "object",
@@ -425,7 +427,8 @@
       },
       "usedBy": [
         "kyc-review",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "merchant-onboarding"
       ],
       "configSchema": {
         "type": "object",
@@ -759,7 +762,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "merchant-onboarding"
       ],
       "configSchema": {
         "type": "object",
@@ -915,7 +919,8 @@
       },
       "usedBy": [
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "merchant-onboarding"
       ],
       "configSchema": {
         "type": "object",
@@ -1258,7 +1263,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "merchant-onboarding"
       ],
       "configSchema": {
         "type": "object",
@@ -1317,7 +1323,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "merchant-onboarding"
       ],
       "configSchema": {
         "type": "object",
@@ -1547,6 +1554,72 @@
         }
       },
       {
+        "name": "merchant_applications",
+        "pk": "id",
+        "piiFields": [
+          "contact_name",
+          "contact_email"
+        ],
+        "fields": {
+          "id": {
+            "label": "Application",
+            "type": "text"
+          },
+          "legal_name": {
+            "label": "Legal name",
+            "type": "text"
+          },
+          "contact_name": {
+            "label": "Contact",
+            "type": "text"
+          },
+          "contact_email": {
+            "label": "Contact email",
+            "type": "text"
+          },
+          "country": {
+            "label": "Country",
+            "type": "text"
+          },
+          "mcc": {
+            "label": "Business category (MCC)",
+            "type": "text"
+          },
+          "expected_monthly_volume": {
+            "label": "Expected monthly volume",
+            "type": "currency"
+          },
+          "risk_tier": {
+            "label": "Risk tier",
+            "type": "status",
+            "tones": {
+              "low": "good",
+              "medium": "warn",
+              "high": "bad"
+            }
+          },
+          "status": {
+            "label": "Status",
+            "type": "status",
+            "tones": {
+              "needs_info": "warn"
+            }
+          },
+          "assignee": {
+            "label": "Assignee",
+            "type": "text"
+          },
+          "submitted_at": {
+            "label": "Submitted",
+            "type": "date"
+          },
+          "updated_at": {
+            "label": "Updated",
+            "type": "date"
+          }
+        }
+      },
+      {
         "name": "feature_flags",
         "pk": "id",
         "piiFields": [],
@@ -1690,6 +1763,33 @@
         "claim",
         "contest",
         "accept"
+      ],
+      "blocks": [
+        "metric-cards",
+        "review-queue",
+        "chart",
+        "data-grid",
+        "record-detail",
+        "audit-timeline",
+        "comments"
+      ]
+    },
+    {
+      "slug": "merchant-onboarding",
+      "name": "Merchant Onboarding Review",
+      "permissions": [
+        "view",
+        "decide",
+        "pii.reveal",
+        "comment",
+        "export"
+      ],
+      "actions": [
+        "claim",
+        "approve",
+        "reject",
+        "requestInfo",
+        "resume"
       ],
       "blocks": [
         "metric-cards",

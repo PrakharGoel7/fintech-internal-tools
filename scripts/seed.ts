@@ -78,5 +78,22 @@ for (let i = 1; i <= DISPUTES; i++) {
     status === "won" ? 100 : status === "lost" ? 0 : null, created, created);
 }
 
-audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES } });
+const mer = db.prepare(`INSERT INTO merchant_applications VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`);
+const bizWords = ["Northwind", "Bluebird", "Harbor", "Juniper", "Summit", "Copper", "Lantern", "Maple", "Orchid", "Granite", "Pioneer", "Cedar"];
+const bizKinds = ["Coffee Co", "Outfitters", "Digital Ltd", "Travel GmbH", "Electronics", "Supplements", "Games", "Market", "Consulting LLC", "Crypto Exchange"];
+const mccs = ["5411 Grocery stores", "5812 Restaurants", "5732 Electronics", "5999 Misc. retail", "4722 Travel agencies", "7372 Software", "5122 Drugs & sundries", "7995 Gambling", "6051 Crypto / quasi-cash"];
+const MERCHANTS = 60;
+for (let i = 1; i <= MERCHANTS; i++) {
+  const contact = name();
+  const mcc = pick(mccs);
+  const tier = /7995|6051|5122/.test(mcc) ? "high" : pick(["low", "low", "medium", "medium", "high"]);
+  const status = i <= 26 ? (i <= 6 ? "in_review" : "pending") : pick(["approved", "approved", "approved", "rejected", "needs_info"]);
+  const submitted = status === "pending" || status === "in_review" ? daysAgo(int(0, 4), int(0, 23)) : daysAgo(int(5, 45), int(0, 23));
+  mer.run(`MER-${1000 + i}`, `${pick(bizWords)} ${pick(bizKinds)}`, contact, email(contact),
+    pick(["US", "US", "US", "GB", "CA", "DE", "MX", "SG", "NG", "AE"]), mcc,
+    tier === "high" ? int(80, 900) * 1000 : int(5, 250) * 1000, tier, status,
+    status === "pending" ? null : pick(["alice", "alice", "bob"]), submitted, submitted);
+}
+
+audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES, merchant_applications: MERCHANTS } });
 console.log(`Seeded ${file}`);
