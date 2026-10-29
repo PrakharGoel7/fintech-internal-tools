@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Internal Tools on Devin — a Power Apps alternative (prototype)
 
-## Getting Started
+Apps are **typed config files composed from reusable, governed blocks**. Devin builds new apps from plain-language requests using the skills in `.agents/skills/`, and the platform layer enforces fintech guardrails no matter what the app config says.
 
-First, run the development server:
-
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+```
+request (ops / compliance / eng) ──► Devin: build-internal-app skill
+        │                              ├─ reads catalog.json + GAPS.md
+        │                              ├─ spec + coverage table (covered / extend / app-local / new block)
+        │                              └─ src/apps/<slug>/app.ts  ──► PR (CI: validate, boundaries, tests)
+        ▼
+ Portal ── app renderer ── blocks (L3) ── connectors (L2) ── platform (L0: RBAC, audit, PII, maker-checker)
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## What's in the prototype
+| Power Apps concept | Here |
+|---|---|
+| Canvas/model-driven app | `src/apps/<slug>/app.ts` — one `defineApp({...})` |
+| Controls / components | 9 blocks in `src/blocks/` (data-grid, record-detail, review-queue, metric-cards, chart, toggle-matrix, form, audit-timeline, comments) each with a zod schema + manifest |
+| Connectors | `src/connectors/` — table sources with PII tags; mocked Stripe & KYC vendor |
+| Power Automate approvals | Declarative `approval` rules on actions → shared Approvals inbox (maker ≠ checker) |
+| Environments / DLP / audit | Server-side RBAC, masked PII with audited reveal, hash-chained audit log, reason codes, idempotency |
+| Maker experience | Devin + `build-internal-app` skill + `catalog.json`; ops/compliance use the **Request an app** page |
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Rebuilt apps: **KYC Review Queue**, **Refunds Dashboard**, **Feature Flag Admin** — all pure config (+ one 4-line app-local handler).
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Run
+```bash
+source ~/.nvm/nvm.sh   # Node >= 22.5 (uses node:sqlite)
+npm install
+npm run seed           # synthetic data only
+npm run dev            # http://localhost:3000 — switch users via the MOCK SSO dropdown
+```
+Optional: set `GITHUB_TOKEN` + `GITHUB_REPO` (files an issue per request) and/or `DEVIN_API_KEY` + `DEVIN_ORG_ID` (starts a Devin session per request via the v3 API; create the key under Settings > Devin API — a service user with `UseDevinSessions`, or a PAT). Without `DEVIN_ORG_ID` the legacy v1 endpoint is used.
 
-## Learn More
+## Demo script
+1. **Alice (KYC analyst)** → KYC queue → claim a high-risk case → Approve → goes to Approvals (needs Compliance).
+2. **Carol (Compliance)** → Approvals → approve; reveal SSN on the case (audited).
+3. **Bob (Ops lead)** → Refunds → issue a $120 refund (instant, mock Stripe) and a $2,000 one (needs Finance) → **Erin** approves.
+4. **Dan (Engineer)** → enable a flag in prod → pending → **Priya** approves. Turning it off (kill switch) is instant.
+5. **Audit log** → Verify integrity ✓ → `npm run tamper-demo` → Verify again ✗.
+6. **Module catalog** → reuse matrix, block contracts, GAPS ledger.
+7. **Request an app** → submit as an ops user → prompt handed to Devin.
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Checks
+`npm run check` — typecheck, lint, layer boundaries, app config validation, catalog freshness, unit tests (RBAC, maker-checker, idempotency, PII, audit tamper detection).
