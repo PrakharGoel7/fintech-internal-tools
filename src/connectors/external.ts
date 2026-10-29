@@ -28,6 +28,13 @@ export const externalConnectors: Record<string, Record<string, ConnectorOp>> = {
       return { status: "accepted" };
     },
   },
+  ledger: {
+    /** Post a write-off journal entry (GL) for an unreconciled difference. */
+    postWriteOff: (record) => {
+      if (!record) throw new Error("ledger.postWriteOff requires a record");
+      return { status: "written_off", resolution: "write_off", journal_entry_id: id("je") };
+    },
+  },
   kycVendor: {
     /** Re-run watchlist / document screening with the KYC vendor (Persona/Alloy-style). */
     rescreen: (record) => {

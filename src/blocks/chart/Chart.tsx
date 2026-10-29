@@ -2,7 +2,7 @@ import type { z } from "zod";
 import { getSource } from "@/connectors";
 import type { BlockProps } from "../types";
 import type { configSchema } from "./manifest";
-import { aggregate } from "../metric-cards/MetricCards";
+import { aggregate } from "../metric-cards/aggregate";
 import { ChartView } from "./ChartView";
 
 export function Chart({ config, title }: BlockProps<z.infer<typeof configSchema>>) {
@@ -14,7 +14,7 @@ export function Chart({ config, title }: BlockProps<z.infer<typeof configSchema>
     groups.set(k, [...(groups.get(k) ?? []), r]);
   }
   const data = [...groups.entries()]
-    .map(([name, rs]) => ({ name, value: Math.round(aggregate(rs, config.agg, config.field) * 100) / 100 }))
+    .map(([name, rs]) => ({ name, value: Math.round(aggregate(rs, config.agg, config.field, config.numerator) * 100) / 100 }))
     .sort((a, b) => (config.bucket === "day" ? a.name.localeCompare(b.name) : b.value - a.value));
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">

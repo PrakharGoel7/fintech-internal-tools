@@ -7,15 +7,16 @@ export const configSchema = z.object({
   kind: z.enum(["bar", "line", "pie"]).default("bar"),
   groupBy: z.string(),
   bucket: z.enum(["none", "day"]).default("none").describe("Bucket date fields by day"),
-  agg: z.enum(["count", "sum", "avg"]).default("count"),
+  agg: z.enum(["count", "sum", "avg", "ratio"]).default("count"),
   field: z.string().optional(),
   where: conditionsSchema.optional(),
+  numerator: conditionsSchema.optional().describe("Required for ratio: % of rows in each group (after `where`) that also match these conditions"),
   currency: z.boolean().default(false),
-});
+}).refine((c) => c.agg !== "ratio" || !!c.numerator?.length, { message: "ratio requires numerator conditions", path: ["numerator"] });
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "chart",
-  version: "1.0.0",
+  version: "1.1.0",
   category: "insight",
   summary: "Bar/line/pie chart grouping a data source by a field (optionally bucketed by day).",
   useWhen: ["Trends over time", "Breakdowns by category/status"],

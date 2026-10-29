@@ -89,7 +89,7 @@ export default defineApp({
             ],
           },
         },
-        { type: "chart", width: "half", title: "Win rate by reason (%, decided disputes)", config: { source: "disputes", kind: "bar", groupBy: "reason", agg: "avg", field: "win_pct", where: [{ field: "status", op: "in", value: ["won", "lost"] }] } },
+        { type: "chart", width: "half", title: "Win rate by reason (%, decided disputes)", config: { source: "disputes", kind: "bar", groupBy: "reason", agg: "ratio", numerator: [{ field: "status", op: "eq", value: "won" }], where: [{ field: "status", op: "in", value: ["won", "lost"] }] } },
         { type: "chart", width: "half", title: "Amount at risk by reason", config: { source: "disputes", kind: "bar", groupBy: "reason", agg: "sum", field: "amount", currency: true, where: [{ field: "status", op: "in", value: OPEN }] } },
         { type: "chart", width: "half", title: "Disputes by status", config: { source: "disputes", kind: "pie", groupBy: "status" } },
         { type: "chart", width: "half", title: "Open disputes by card network", config: { source: "disputes", kind: "pie", groupBy: "card_network", where: [{ field: "status", op: "in", value: OPEN }] } },

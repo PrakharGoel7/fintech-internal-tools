@@ -57,7 +57,7 @@ const flags: [string, string, string, number, number, number, number][] = [
 const fl = db.prepare(`INSERT INTO feature_flags VALUES (?,?,?,?,?,?,?,?,?)`);
 for (const f of flags) fl.run(...f, daysAgo(int(10, 90)), daysAgo(int(0, 9)));
 
-const dsp = db.prepare(`INSERT INTO disputes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+const dsp = db.prepare(`INSERT INTO disputes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
 const disputeReasons = ["fraudulent", "product_not_received", "duplicate", "subscription_canceled", "unrecognized"];
 /** Synthetic evidence windows; real windows vary by network and are set by Stripe's `evidence_details.due_by`. */
 const evidenceWindowDays: Record<string, number> = { visa: 7, mastercard: 7, amex: 10, discover: 9 };
@@ -75,8 +75,33 @@ for (let i = 1; i <= DISPUTES; i++) {
     network, pick(disputeReasons), new Date(createdMs + window * 86400000).toISOString(), status,
     open ? (i <= 5 ? pick(["alice", "bob"]) : null) : pick(["alice", "alice", "bob"]),
     ["under_review", "won", "lost"].includes(status) ? `evs_${(80000 + i).toString(36)}` : null,
-    status === "won" ? 100 : status === "lost" ? 0 : null, created, created);
+    created, created);
 }
 
-audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES } });
+const pay = db.prepare(`INSERT INTO payouts VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
+const PAYOUT_DAYS = 45;
+let payouts = 0;
+for (let d = PAYOUT_DAYS; d >= 1; d--) {
+  for (let k = 0; k < 3; k++) {
+    payouts++;
+    const date = daysAgo(d).slice(0, 10);
+    const expected = int(4000, 85000) + int(0, 99) / 100;
+    const roll = rand();
+    // ~78% match; the rest are short-paid (fees, FX) or occasionally over-paid, some large.
+    const kind = roll < 0.78 ? "match" : roll < 0.86 ? "fee" : roll < 0.93 ? "fx" : roll < 0.97 ? "large" : "over";
+    const diff = kind === "match" ? 0 : kind === "fee" ? -(int(5, 60) + 0.5) : kind === "fx" ? -(int(40, 240) + 0.25) : kind === "large" ? -int(300, 4200) : int(20, 900);
+    const missing = kind === "large" && rand() < 0.3;
+    const received = missing ? 0 : Math.round((expected + diff) * 100) / 100;
+    const difference = Math.round((received - expected) * 100) / 100;
+    const status = kind === "match" ? "matched" : d <= 10 ? pick(["mismatch", "mismatch", "investigating"]) : pick(["resolved", "resolved", "written_off", "mismatch"]);
+    const resolution = status === "resolved" ? (kind === "fee" ? "bank_fee" : kind === "fx" ? "fx" : "timing") : status === "written_off" ? "write_off" : null;
+    const ingested = `${date}T06:00:00.000Z`;
+    pay.run(`po_${(31000000 + payouts * 7907).toString(36)}`, date, "USD", expected, received, difference, Math.abs(difference),
+      missing ? null : `BNK-${date.replace(/-/g, "")}-${String(100 + k).padStart(4, "0")}`, status, resolution,
+      ["investigating", "resolved", "written_off"].includes(status) ? pick(["alice", "erin"]) : null,
+      status === "written_off" ? `je_${(60000 + payouts).toString(36)}` : null, ingested, ingested);
+  }
+}
+
+audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES, payouts } });
 console.log(`Seeded ${file}`);

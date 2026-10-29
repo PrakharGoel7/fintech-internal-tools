@@ -10,12 +10,12 @@ const [alice, bob, erin, sam] = ["alice", "bob", "erin", "sam"].map(getUser);
 const disputes = getSource("disputes");
 
 beforeAll(() => {
-  const ins = getDb().prepare("INSERT INTO disputes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
+  const ins = getDb().prepare("INSERT INTO disputes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)");
   const now = new Date().toISOString();
   const due = (h: number) => new Date(Date.now() + h * 3600000).toISOString();
-  ins.run("dp_small", "ch_a", "Test Person", "test.person@example.com", 250, "USD", "visa", "fraudulent", due(72), "needs_response", null, null, null, now, now);
-  ins.run("dp_big", "ch_b", "Big Spender", "big.spender@example.com", 2400, "USD", "amex", "duplicate", due(72), "needs_response", null, null, null, now, now);
-  ins.run("dp_late", "ch_c", "Late Person", "late@example.com", 90, "USD", "visa", "unrecognized", due(-1), "needs_response", null, null, null, now, now);
+  ins.run("dp_small", "ch_a", "Test Person", "test.person@example.com", 250, "USD", "visa", "fraudulent", due(72), "needs_response", null, null, now, now);
+  ins.run("dp_big", "ch_b", "Big Spender", "big.spender@example.com", 2400, "USD", "amex", "duplicate", due(72), "needs_response", null, null, now, now);
+  ins.run("dp_late", "ch_c", "Late Person", "late@example.com", 90, "USD", "visa", "unrecognized", due(-1), "needs_response", null, null, now, now);
 });
 
 describe("chargeback-disputes", () => {

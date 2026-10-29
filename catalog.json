@@ -58,7 +58,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "payout-reconciliation"
       ],
       "configSchema": {
         "type": "object",
@@ -148,7 +149,8 @@
                         ]
                       }
                     }
-                  ]
+                  ],
+                  "description": "Relative dates for gt/gte/lt/lte: \"$now\", \"$now-30d\", \"$now+48h\""
                 }
               },
               "required": [
@@ -269,7 +271,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "payout-reconciliation"
       ],
       "configSchema": {
         "type": "object",
@@ -425,7 +428,8 @@
       },
       "usedBy": [
         "kyc-review",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "payout-reconciliation"
       ],
       "configSchema": {
         "type": "object",
@@ -474,7 +478,8 @@
                         ]
                       }
                     }
-                  ]
+                  ],
+                  "description": "Relative dates for gt/gte/lt/lte: \"$now\", \"$now-30d\", \"$now+48h\""
                 }
               },
               "required": [
@@ -660,7 +665,8 @@
                               ]
                             }
                           }
-                        ]
+                        ],
+                        "description": "Relative dates for gt/gte/lt/lte: \"$now\", \"$now-30d\", \"$now+48h\""
                       }
                     },
                     "required": [
@@ -718,9 +724,9 @@
     },
     {
       "name": "metric-cards",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "insight",
-      "summary": "Row of KPI cards computed from a data source (count/sum/avg with filters).",
+      "summary": "Row of KPI cards computed from a data source (count/sum/avg/max/min, or ratio = % of rows matching conditions).",
       "useWhen": [
         "Headline numbers at the top of a dashboard or queue"
       ],
@@ -752,14 +758,44 @@
             "label": "Refunded (30d)",
             "agg": "sum",
             "field": "amount",
-            "format": "currency"
+            "format": "currency",
+            "where": [
+              {
+                "field": "created_at",
+                "op": "gte",
+                "value": "$now-30d"
+              }
+            ]
+          },
+          {
+            "label": "Denial rate",
+            "agg": "ratio",
+            "numerator": [
+              {
+                "field": "status",
+                "op": "eq",
+                "value": "denied"
+              }
+            ],
+            "where": [
+              {
+                "field": "status",
+                "op": "in",
+                "value": [
+                  "issued",
+                  "denied"
+                ]
+              }
+            ],
+            "format": "percent"
           }
         ]
       },
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "payout-reconciliation"
       ],
       "configSchema": {
         "type": "object",
@@ -782,7 +818,8 @@
                     "sum",
                     "avg",
                     "max",
-                    "min"
+                    "min",
+                    "ratio"
                   ]
                 },
                 "field": {
@@ -830,7 +867,8 @@
                               ]
                             }
                           }
-                        ]
+                        ],
+                        "description": "Relative dates for gt/gte/lt/lte: \"$now\", \"$now-30d\", \"$now+48h\""
                       }
                     },
                     "required": [
@@ -840,6 +878,60 @@
                     ],
                     "additionalProperties": false
                   }
+                },
+                "numerator": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "field": {
+                        "type": "string"
+                      },
+                      "op": {
+                        "type": "string",
+                        "enum": [
+                          "eq",
+                          "neq",
+                          "gt",
+                          "gte",
+                          "lt",
+                          "lte",
+                          "in",
+                          "notIn"
+                        ]
+                      },
+                      "value": {
+                        "anyOf": [
+                          {
+                            "type": "string"
+                          },
+                          {
+                            "type": "number"
+                          },
+                          {
+                            "type": "boolean"
+                          },
+                          {
+                            "type": "array",
+                            "items": {
+                              "type": [
+                                "string",
+                                "number"
+                              ]
+                            }
+                          }
+                        ],
+                        "description": "Relative dates for gt/gte/lt/lte: \"$now\", \"$now-30d\", \"$now+48h\""
+                      }
+                    },
+                    "required": [
+                      "field",
+                      "op",
+                      "value"
+                    ],
+                    "additionalProperties": false
+                  },
+                  "description": "Required for ratio: % of rows (after `where`) that also match these conditions"
                 },
                 "format": {
                   "type": "string",
@@ -887,7 +979,7 @@
     },
     {
       "name": "chart",
-      "version": "1.0.0",
+      "version": "1.1.0",
       "category": "insight",
       "summary": "Bar/line/pie chart grouping a data source by a field (optionally bucketed by day).",
       "useWhen": [
@@ -915,7 +1007,8 @@
       },
       "usedBy": [
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "payout-reconciliation"
       ],
       "configSchema": {
         "type": "object",
@@ -949,7 +1042,8 @@
             "enum": [
               "count",
               "sum",
-              "avg"
+              "avg",
+              "ratio"
             ],
             "default": "count"
           },
@@ -997,7 +1091,8 @@
                         ]
                       }
                     }
-                  ]
+                  ],
+                  "description": "Relative dates for gt/gte/lt/lte: \"$now\", \"$now-30d\", \"$now+48h\""
                 }
               },
               "required": [
@@ -1007,6 +1102,60 @@
               ],
               "additionalProperties": false
             }
+          },
+          "numerator": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "op": {
+                  "type": "string",
+                  "enum": [
+                    "eq",
+                    "neq",
+                    "gt",
+                    "gte",
+                    "lt",
+                    "lte",
+                    "in",
+                    "notIn"
+                  ]
+                },
+                "value": {
+                  "anyOf": [
+                    {
+                      "type": "string"
+                    },
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "boolean"
+                    },
+                    {
+                      "type": "array",
+                      "items": {
+                        "type": [
+                          "string",
+                          "number"
+                        ]
+                      }
+                    }
+                  ],
+                  "description": "Relative dates for gt/gte/lt/lte: \"$now\", \"$now-30d\", \"$now+48h\""
+                }
+              },
+              "required": [
+                "field",
+                "op",
+                "value"
+              ],
+              "additionalProperties": false
+            },
+            "description": "Required for ratio: % of rows in each group (after `where`) that also match these conditions"
           },
           "currency": {
             "type": "boolean",
@@ -1258,7 +1407,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "payout-reconciliation"
       ],
       "configSchema": {
         "type": "object",
@@ -1317,7 +1467,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes"
+        "chargeback-disputes",
+        "payout-reconciliation"
       ],
       "configSchema": {
         "type": "object",
@@ -1532,12 +1683,78 @@
             "label": "Evidence submission",
             "type": "text"
           },
-          "win_pct": {
-            "label": "Win %",
-            "type": "number"
-          },
           "created_at": {
             "label": "Opened",
+            "type": "date"
+          },
+          "updated_at": {
+            "label": "Updated",
+            "type": "date"
+          }
+        }
+      },
+      {
+        "name": "payouts",
+        "pk": "id",
+        "piiFields": [],
+        "fields": {
+          "id": {
+            "label": "Payout",
+            "type": "text"
+          },
+          "payout_date": {
+            "label": "Payout date",
+            "type": "date"
+          },
+          "currency": {
+            "label": "Currency",
+            "type": "text"
+          },
+          "expected_amount": {
+            "label": "Expected (Stripe)",
+            "type": "currency"
+          },
+          "received_amount": {
+            "label": "Received (bank)",
+            "type": "currency"
+          },
+          "difference": {
+            "label": "Difference",
+            "type": "currency"
+          },
+          "difference_abs": {
+            "label": "Abs. difference",
+            "type": "currency"
+          },
+          "bank_reference": {
+            "label": "Bank reference",
+            "type": "text"
+          },
+          "status": {
+            "label": "Status",
+            "type": "status",
+            "tones": {
+              "matched": "good",
+              "mismatch": "bad",
+              "investigating": "warn",
+              "resolved": "info",
+              "written_off": "neutral"
+            }
+          },
+          "resolution": {
+            "label": "Resolution",
+            "type": "text"
+          },
+          "assignee": {
+            "label": "Assignee",
+            "type": "text"
+          },
+          "journal_entry_id": {
+            "label": "Journal entry",
+            "type": "text"
+          },
+          "created_at": {
+            "label": "Ingested",
             "type": "date"
           },
           "updated_at": {
@@ -1595,6 +1812,9 @@
         "refund",
         "submitDisputeEvidence",
         "acceptDispute"
+      ],
+      "ledger": [
+        "postWriteOff"
       ],
       "kycVendor": [
         "rescreen"
@@ -1695,6 +1915,32 @@
         "metric-cards",
         "review-queue",
         "chart",
+        "data-grid",
+        "record-detail",
+        "audit-timeline",
+        "comments"
+      ]
+    },
+    {
+      "slug": "payout-reconciliation",
+      "name": "Payout Reconciliation",
+      "permissions": [
+        "view",
+        "work",
+        "comment",
+        "export"
+      ],
+      "actions": [
+        "investigate",
+        "resolveTiming",
+        "resolveBankFee",
+        "resolveFx",
+        "writeOff"
+      ],
+      "blocks": [
+        "metric-cards",
+        "chart",
+        "review-queue",
         "data-grid",
         "record-detail",
         "audit-timeline",
