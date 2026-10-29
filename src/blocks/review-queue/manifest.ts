@@ -10,7 +10,11 @@ export const configSchema = z.object({
   decisionActions: z.array(z.string()).min(1),
   summaryFields: z.array(columnSchema).min(1).describe("Shown in the queue list"),
   detailFields: z.array(columnSchema).min(1),
-  sla: z.object({ field: z.string(), hours: z.number().positive() }).optional(),
+  sla: z.object({
+    field: z.string().describe("Timestamp field the timer is based on"),
+    hours: z.number().positive().describe("elapsed: SLA length in hours. deadline: show a warning when fewer hours remain"),
+    mode: z.enum(["elapsed", "deadline"]).default("elapsed").describe("elapsed: due = field + hours (e.g. created_at). deadline: field is an absolute due date (e.g. evidence_due_by)"),
+  }).optional(),
   priorityField: z.string().optional().describe("Numeric field; higher = shown with a risk badge"),
   comments: z.boolean().default(true),
   history: z.boolean().default(true),
@@ -18,10 +22,10 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "review-queue",
-  version: "1.0.0",
+  version: "1.1.0",
   category: "workflow",
-  summary: "Claimable work queue with SLA timers, assignment, detail panel, decisions, comments and per-item audit history.",
-  useWhen: ["Humans process items one at a time and record a decision (KYC, disputes, fraud alerts, content review)", "Work needs ownership and SLA tracking"],
+  summary: "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
+  useWhen: ["Humans process items one at a time and record a decision (KYC, disputes, fraud alerts, content review)", "Work needs ownership and SLA tracking", "Items have an external hard deadline (sla.mode = deadline)"],
   notFor: ["Read-only browsing (use data-grid)", "Bulk configuration (use toggle-matrix)"],
   requires: ["rbac", "pii-masking", "audit", "maker-checker"],
   emitsAudit: ["action.<claim>", "action.<decision>", "approval.requested", "comment.added", "pii.revealed"],

@@ -3,20 +3,13 @@ import type { z } from "zod";
 import { getSource } from "@/connectors";
 import type { BlockProps } from "../types";
 import type { configSchema } from "./manifest";
-import { resolveColumns, FormattedValue, StatusBadge, relative } from "../_shared/format";
+import { resolveColumns, FormattedValue, StatusBadge, relative, formatPlain } from "../_shared/format";
+import { slaState } from "./sla";
 import { actionMeta } from "../_shared/actions";
 import { ActionButton } from "../_shared/ActionButton";
 import { FieldList } from "../record-detail/RecordDetail";
 import { Comments } from "../comments/Comments";
 import { AuditTimeline } from "../audit-timeline/AuditTimeline";
-
-function slaState(createdIso: string, hours: number) {
-  const elapsed = (Date.now() - new Date(createdIso).getTime()) / 3600000;
-  const left = hours - elapsed;
-  if (left < 0) return { label: `SLA breached ${Math.round(-left)}h`, cls: "bg-rose-100 text-rose-700" };
-  if (left < hours * 0.25) return { label: `${Math.round(left)}h left`, cls: "bg-amber-100 text-amber-800" };
-  return { label: `${Math.round(left)}h left`, cls: "bg-slate-100 text-slate-600" };
-}
 
 export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof configSchema>>) {
   const source = getSource(config.source);
@@ -45,7 +38,7 @@ export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof co
         <ul className="max-h-[640px] divide-y divide-slate-100 overflow-y-auto">
           {items.map((r) => {
             const id = String(r[source.def.pk]);
-            const sla = config.sla ? slaState(String(r[config.sla.field]), config.sla.hours) : null;
+            const sla = config.sla ? slaState(String(r[config.sla.field]), config.sla) : null;
             const prio = config.priorityField ? Number(r[config.priorityField]) : null;
             return (
               <li key={id}>
@@ -78,7 +71,8 @@ export function ReviewQueue({ config, ctx, title }: BlockProps<z.infer<typeof co
                   <h3 className="text-lg font-semibold text-slate-900">{String(selected[source.def.titleField])}</h3>
                   <p className="mt-0.5 flex items-center gap-2 font-mono text-xs text-slate-500">
                     {selectedId} <StatusBadge value={selected.status} />
-                    {config.sla && <span className="font-sans">submitted {relative(String(selected[config.sla.field]))}</span>}
+                    {config.sla && config.sla.mode === "elapsed" && <span className="font-sans">submitted {relative(String(selected[config.sla.field]))}</span>}
+                    {config.sla && config.sla.mode === "deadline" && <span className="font-sans">due {formatPlain(selected[config.sla.field], "datetime")} ({slaState(String(selected[config.sla.field]), config.sla).label})</span>}
                   </p>
                 </div>
                 <div className="flex flex-wrap gap-2">
