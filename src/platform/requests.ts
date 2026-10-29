@@ -34,7 +34,7 @@ Start with Phase 1 (spec + gap analysis) and post the spec for approval before b
 
 export async function submitAppRequest(user: User, req: AppRequestInput) {
   if (!req.title?.trim() || !req.problem?.trim()) throw new Error("Title and problem are required");
-  const repo = process.env.GITHUB_REPO ?? "PrakharGoel7/devin-internal-tools";
+  const repo = process.env.GITHUB_REPO ?? "PrakharGoel7/fintech-internal-tools";
   const prompt = buildDevinPrompt(req, user, repo);
   const db = getDb();
   const res = db.prepare("INSERT INTO app_requests (ts, requested_by, title, body, status) VALUES (?, ?, ?, ?, 'submitted')")
