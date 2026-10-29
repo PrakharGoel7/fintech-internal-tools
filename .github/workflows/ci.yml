@@ -5,9 +5,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
       - uses: actions/setup-node@v4
         with: { node-version: 24, cache: npm }
       - run: npm ci
       - run: npm run check
+      - if: github.event_name == 'pull_request'
+        run: npm run graph -- --diff origin/${{ github.base_ref }}
       - run: npm run seed && npm run build
       - run: (npm start -- -p 3000 &) && npm run smoke
