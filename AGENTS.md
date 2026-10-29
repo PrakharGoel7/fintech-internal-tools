@@ -1,0 +1,35 @@
+# AGENTS.md — rules for Devin (and humans) working in this repo
+
+This repo is an internal-tools platform. Apps are **config files composed from reusable blocks**, not hand-written pages.
+
+## Layers (imports only flow downward — enforced by `npm run boundaries`)
+| Layer | Path | What lives here |
+|---|---|---|
+| L0 platform | `src/platform/` | users/roles, RBAC, hash-chained audit, PII masking, action pipeline (reason codes → guards → idempotency → maker-checker → execute → audit), approvals, validation |
+| L2 connectors | `src/connectors/` | typed data sources (`TableSource`) with PII field tags; external connectors (Stripe, KYC vendor — mocked) |
+| L3 blocks | `src/blocks/<name>/` | `manifest.ts` (zod config schema + use-when/not-for + guarantees) and a React component |
+| Apps | `src/apps/<slug>/app.ts` | one `defineApp({...})` call: permissions, actions, pages → blocks |
+| Portal | `src/app/` | Next.js routes: gallery, generic app renderer, approvals, audit, catalog, request intake |
+
+## Hard rules
+1. **Never bypass the platform.** Apps never touch the DB or connectors directly; every mutation is an `action` in `app.ts` and runs through `runAction`.
+2. Every app declares `permissions.view`. Anything moving money, touching PII, or changing prod config needs `reasonCodes` and, above a threshold, an `approval` rule.
+3. Mark PII fields in the connector (`piiFields`). Never log PII in audit `details`.
+4. Synthetic data only. No real customer data, secrets or vendor keys in the repo.
+5. Prefer the **lowest rung** of the customization ladder and justify rung ≥ 4 in the PR:
+   1) block config → 2) page/block composition → 3) app `handlers` (app-local logic) → 4) new connector/source → 5) extend a block (new optional config, backwards compatible) → 6) new block (via `create-block` skill).
+6. When a need isn't covered by any block, build it app-locally (handler) and add a row to `GAPS.md`. Second occurrence → propose extraction. Third occurrence, or anything compliance-critical → new block.
+
+## Before opening a PR
+```
+npm run check   # typecheck, lint, boundaries, validate-apps, catalog freshness, tests
+npm run build
+```
+Regenerate `catalog.json` with `npm run catalog` whenever blocks/connectors/apps change.
+
+## Skills
+- `.agents/skills/build-internal-app` — request → spec + gap analysis → build → verify → PR
+- `.agents/skills/create-block` — add a new reusable L3 block
+
+## Local run
+`source ~/.nvm/nvm.sh && npm install && npm run seed && npm run dev` (Node ≥ 22.5 for `node:sqlite`). Switch users with the mock-SSO dropdown in the header.
