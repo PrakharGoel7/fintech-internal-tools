@@ -8,6 +8,7 @@ import { getAppRequest, loadRequestState, canReviewRequests, canShip, STAGES, SH
 import { pullFiles, fileAt, journeyVideos } from "@/platform/github";
 import { relative, TONE_CLS } from "@/blocks/_shared/format";
 import { SpecReview, ShipButton } from "./ReviewButtons";
+import { JourneyVideo } from "./JourneyVideo";
 
 const STEPS: { label: string; stages: Stage[] }[] = [
   { label: "Requested", stages: ["submitted", "drafting"] },
@@ -64,7 +65,7 @@ export default async function RequestDetail({ params }: { params: Promise<{ id: 
       {stage === "spec_review" && (
         <section className="card border-l-4 border-l-amber-400 p-4">
           <h2 className="card-title">Your review: spec and tests</h2>
-          <p className="mb-3 mt-1 text-sm text-slate-600">Devin wrote the spec, its assumptions, and the scenarios and journeys as tests. Nothing is built yet. Approve to start the build, or tell Devin what to change.</p>
+          <p className="mb-3 mt-1 text-sm text-slate-600">Nothing is built yet. Check the assumptions and tests below.</p>
           <SpecReview id={r.id} />
         </section>
       )}
@@ -73,7 +74,7 @@ export default async function RequestDetail({ params }: { params: Promise<{ id: 
       {stage === "ready_to_ship" && (
         <section className="card border-l-4 border-l-emerald-500 p-4">
           <h2 className="card-title">Ready to ship</h2>
-          <p className="mb-3 mt-1 text-sm text-slate-600">Built, every scenario and journey passed in CI. Watch the journey videos below, then push to production (merges PR #{pull!.number}).</p>
+          <p className="mb-3 mt-1 text-sm text-slate-600">All tests passed. Watch the journey videos, then push to production (merges PR #{pull!.number}).</p>
           <ShipButton id={r.id} allowed={canShip(user)} why={`Only ${SHIP_ROLES.join(" / ")} can push to production`} />
         </section>
       )}
@@ -85,7 +86,7 @@ export default async function RequestDetail({ params }: { params: Promise<{ id: 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {videos.map((v) => (
               <figure key={v.video} className="card overflow-hidden">
-                <video controls preload="metadata" className="w-full bg-slate-900" src={`/api/journey-videos/${pull!.headSha}/${encodeURIComponent(v.video)}`} />
+                <JourneyVideo src={`/api/journey-videos/${pull!.headSha}/${encodeURIComponent(v.video)}`} />
                 <figcaption className="flex items-start gap-2 p-3 text-sm">
                   <span className={`badge ${TONE_CLS[v.ok ? "good" : "bad"]}`}>{v.ok ? "passed" : "failed"}</span>
                   <span className="text-slate-700">{v.journey}{v.error && <span className="block text-xs text-rose-600">{v.error}</span>}</span>

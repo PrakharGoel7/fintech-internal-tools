@@ -15,7 +15,7 @@ export default async function RequestsDashboard() {
     <div className="space-y-5">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">App requests</h1>
-        <p className="mt-1 text-sm text-slate-500">Every app requested through the portal. Review Devin&apos;s spec and tests before it builds; watch the journey videos and push to production when it&apos;s done.</p>
+        <p className="mt-1 text-sm text-slate-500">Approve Devin&apos;s plan before it builds. Watch the test videos before it ships.</p>
       </div>
       <div className="flex gap-3 text-sm">
         <span className={`badge ${TONE_CLS.warn}`}>{waiting} waiting on an engineer</span>

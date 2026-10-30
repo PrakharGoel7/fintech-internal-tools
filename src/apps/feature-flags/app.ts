@@ -5,7 +5,7 @@ const reasons = ["planned_release", "incident_mitigation", "rollback", "experime
 export default defineApp({
   slug: "feature-flags",
   name: "Feature Flag Admin",
-  description: "Toggle flags per environment. Turning a flag ON in prod needs Eng Lead approval; turning it OFF (kill switch) is immediate.",
+  description: "Toggle flags per environment. Prod on needs Eng Lead approval.",
   icon: "🚩",
   category: "engineering",
   owners: ["eng-lead"],

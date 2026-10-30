@@ -1,6 +1,6 @@
 ---
 name: create-block
-description: Add a new reusable L3 block to the catalog. Use only when GAPS.md shows a need recurring ≥3 times, or for a compliance-critical capability.
+description: Add a new reusable L3 block to the catalog. Use only when GAPS.md shows a need from 2 or more apps, or for a compliance-critical capability.
 ---
 
 # Create a block
