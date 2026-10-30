@@ -80,9 +80,16 @@ async function executeEffect(app: AppModule, action: ActionDef, effect: Effect, 
   return { recordId: recordId!, before, after };
 }
 
+function assertSeparated(action: ActionDef, record: Row | null, user: User) {
+  const field = record && action.notBy?.find((f) => record[f] === user.id);
+  if (!field) return;
+  const label = getSource(action.source).def.fields[field]?.label ?? field;
+  throw new ActionError(`"${action.label}" needs someone other than this record's ${label} (segregation of duties)`);
+}
+
 /**
  * The single mutation pipeline for every app:
- * RBAC → reason code → availability guard → idempotency → maker-checker → execute → audit.
+ * RBAC → reason code → availability guard → idempotency → maker-checker → segregation of duties → execute → audit.
  */
 export async function runAction(req: RunActionInput): Promise<ActionResult> {
   const { user, app, actionId } = req;
@@ -125,6 +132,7 @@ export async function runAction(req: RunActionInput): Promise<ActionResult> {
     });
     result = { status: "pending_approval", approvalId, rule };
   } else {
+    assertSeparated(action, record, user);
     const out = await executeEffect(app, action, action.effect, recordId, input, user);
     audit({
       actor: user.id, app: app.slug, action: `action.${actionId}`, source: action.source, recordId: out.recordId,
@@ -185,6 +193,7 @@ export async function decideApproval(opts: {
     db.prepare("UPDATE approvals SET status='failed', decided_by=?, decided_at=?, decision_note=? WHERE id=?").run(opts.user.id, now, "Record changed; action no longer applicable", a.id);
     throw new ActionError("Record changed since the request; action is no longer applicable");
   }
+  assertSeparated(action, record, opts.user);
   const out = await executeEffect(app, action, action.effect, a.record_id, a.input, opts.user);
   db.prepare("UPDATE approvals SET status='approved', decided_by=?, decided_at=?, decision_note=? WHERE id=?").run(opts.user.id, now, opts.note ?? null, a.id);
   audit({

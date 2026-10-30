@@ -1,4 +1,4 @@
-import { defineApp, ActionError } from "@/platform";
+import { defineApp } from "@/platform";
 
 const THRESHOLD = 25000;
 const PENDING = [{ field: "status", op: "eq" as const, value: "pending_review" }];
@@ -27,7 +27,8 @@ export default defineApp({
     },
     approve: {
       label: "Approve for payment", source: "vendor_invoices", permission: "review", variant: "primary",
-      effect: { kind: "handler", name: "approveForPayment" },
+      effect: { kind: "update", set: { status: "approved", approved_by: "$user" } },
+      notBy: ["entered_by"],
       reasonCodes: ["matches_po", "goods_received", "contract_terms", "recurring_service"],
       availableWhen: PENDING,
       approval: {
@@ -129,11 +130,4 @@ export default defineApp({
       }],
     },
   ],
-  handlers: {
-    /** Rung-3: the clerk who entered an invoice cannot approve it (segregation of duties). Over $25,000 this runs once the Finance Lead approves. */
-    approveForPayment: ({ record, user }) => {
-      if (record?.entered_by === user.id) throw new ActionError("You entered this invoice; another clerk must approve it for payment");
-      return { status: "approved", approved_by: user.id };
-    },
-  },
 });

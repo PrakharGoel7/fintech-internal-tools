@@ -62,7 +62,7 @@ Final statuses: `approved`, `rejected`.
 | Action | Permission | Effect | Available when | Reason codes | Note | Approval |
 |---|---|---|---|---|---|---|
 | `enterInvoice` "Enter invoice" | `enter` | create, defaults `status=pending_review`, `currency=USD`, `entered_by=$user` | — | — | — | — |
-| `approve` "Approve for payment" | `review` | `handlers.approveForPayment`: refuses if `entered_by` = current user ("you entered this invoice"); sets `status=approved`, `approved_by=$user` | `status = pending_review` | `matches_po`, `goods_received`, `contract_terms`, `recurring_service` | — | `amount > 25000` → `finance-lead` ("Invoices over $25,000 require Finance Lead approval") |
+| `approve` "Approve for payment" | `review` | update `status=approved`, `approved_by=$user`; `notBy: [entered_by]` (segregation of duties: refused if the executing user entered it) | `status = pending_review` | `matches_po`, `goods_received`, `contract_terms`, `recurring_service` | — | `amount > 25000` → `finance-lead` ("Invoices over $25,000 require Finance Lead approval") |
 | `reject` "Reject" | `review` | update `status=rejected` | `status = pending_review` | `duplicate_invoice`, `amount_mismatch`, `no_matching_po`, `unknown_vendor`, `goods_not_received`, `data_entry_error` | required | — |
 | `hold` "Put on hold" | `review` | update `status=on_hold` | `status = pending_review` | `awaiting_po`, `awaiting_vendor_info`, `bank_details_check`, `amount_disputed` | required | — |
 | `release` "Release" | `review` | update `status=pending_review` | `status = on_hold` | `info_received`, `issue_resolved` | — | — |
@@ -87,12 +87,12 @@ Finance Leads approve big invoices on the portal's existing **Approvals** page.
 | "Who approved what" visible | `approved_by` field, `audit-timeline`, Approvals history | covered |
 | Bank account protected | `piiFields` + `pii.reveal` permission | covered |
 | Due-date visibility | `review-queue.sla` deadline mode + sort | covered |
-| Entering clerk can't approve own invoice (Assumption 3) | `handlers.approveForPayment` | app-local (GAPS.md row) |
+| Entering clerk can't approve own invoice (Assumption 3) | action `notBy: ["entered_by"]` (platform segregation-of-duties rule) | covered (shared; compliance-critical) |
 | Due date picker | text field `YYYY-MM-DD` | gap (open) — candidate: optional `date` type on `form` |
 | Duplicate invoice detection / amount > 0 on create | — | gap (open) — create actions have no validation hook |
 | Clerk role | new `ap-clerk` role + users `maya`, `leo` in `src/platform/users.ts` | platform data (no code change to RBAC) |
 
-Customization rungs: 1–2 (config/composition) for everything except `approveForPayment` (rung 3, app-local handler) and the new `vendor_invoices` source (rung 4: new `SourceDef`, justified — no existing source holds invoices). No block changes, so no block version bumps.
+Customization rungs: 1–2 (config/composition) for everything except the new `vendor_invoices` source (rung 4: new `SourceDef`, justified — no existing source holds invoices). No block changes, so no block version bumps. The segregation-of-duties rule is a new platform action option (`notBy`), shared because it is compliance-critical.
 
 ## Fintech checklist
 - **Money movement:** approval for payment (no funds moved by the app). Reason code required; maker-checker above $25,000 with `finance-lead` checker; requester can never approve their own.
@@ -155,6 +155,6 @@ Users: Maya Johnson & Leo Martins (AP Clerks, new), Erin Patel (Finance Lead), S
    - [ ] Leo approves it for payment _(Leo)_
 
 ## GAPS.md changes (Phase 2)
-- New row: "Block an action when the actor is the record's creator (segregation of duties)" — vendor-invoices (1) — `handlers.approveForPayment` — app-local.
+- New row: "Block an action when the actor is the record's creator (segregation of duties)" — vendor-invoices (1) — platform action option `notBy` — resolved (shared; compliance-critical).
 - New row: "Date input on `form`" — vendor-invoices (1) — text `YYYY-MM-DD` — open.
 - New row: "Validation on create (unique vendor + invoice number, amount > 0)" — vendor-invoices (1) — not built — open.
