@@ -8,7 +8,7 @@ export default function RequestPage() {
     <div className="grid grid-cols-1 gap-6 lg:grid-cols-5">
       <div className="lg:col-span-3">
         <h1 className="text-2xl font-semibold tracking-tight">Request an app</h1>
-        <p className="mb-4 mt-1 text-sm text-slate-500">Plain-language intake for ops, compliance and engineering. Devin turns this into an app spec + gap analysis for approval, then builds it from the module catalog and opens a PR.</p>
+        <p className="mb-4 mt-1 text-sm text-slate-500">Describe the tool you need. An engineer approves Devin’s plan before anything is built.</p>
         <RequestForm />
       </div>
       <div className="lg:col-span-2">

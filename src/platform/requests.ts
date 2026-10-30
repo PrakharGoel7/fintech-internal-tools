@@ -142,7 +142,7 @@ export async function loadRequestState(r: AppRequest) {
   if (!r.ref || !githubConfigured()) return { pull: null, checks: null, stage: requestStage(r, null, null), error: githubConfigured() ? null : "GitHub not configured (set GITHUB_TOKEN)" };
   try {
     const pull = await findRequestPull(r.ref);
-    const checks = pull && !pull.draft ? await checksFor(pull.headSha) : null;
+    const checks = pull ? await checksFor(pull.headSha) : null;
     return { pull, checks, stage: requestStage(r, pull, checks), error: null };
   } catch (e) {
     return { pull: null, checks: null, stage: requestStage(r, null, null), error: (e as Error).message };

@@ -58,7 +58,6 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes",
         "vendor-invoices"
       ],
       "configSchema": {
@@ -270,7 +269,6 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes",
         "vendor-invoices"
       ],
       "configSchema": {
@@ -346,7 +344,7 @@
     },
     {
       "name": "review-queue",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "category": "workflow",
       "summary": "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
       "useWhen": [
@@ -427,7 +425,6 @@
       },
       "usedBy": [
         "kyc-review",
-        "chargeback-disputes",
         "vendor-invoices"
       ],
       "configSchema": {
@@ -762,7 +759,6 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes",
         "vendor-invoices"
       ],
       "configSchema": {
@@ -918,8 +914,7 @@
         "currency": true
       },
       "usedBy": [
-        "refunds",
-        "chargeback-disputes"
+        "refunds"
       ],
       "configSchema": {
         "type": "object",
@@ -1238,7 +1233,7 @@
     },
     {
       "name": "audit-timeline",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "governance",
       "summary": "Read-only view of the tamper-evident audit log, scoped to the app or to one record.",
       "useWhen": [
@@ -1263,7 +1258,6 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "chargeback-disputes",
         "vendor-invoices"
       ],
       "configSchema": {
@@ -1323,7 +1317,6 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "chargeback-disputes",
         "vendor-invoices"
       ],
       "configSchema": {
@@ -1477,83 +1470,6 @@
         }
       },
       {
-        "name": "disputes",
-        "pk": "id",
-        "piiFields": [
-          "customer_name",
-          "customer_email"
-        ],
-        "fields": {
-          "id": {
-            "label": "Dispute",
-            "type": "text"
-          },
-          "charge_id": {
-            "label": "Charge",
-            "type": "text"
-          },
-          "customer_name": {
-            "label": "Customer",
-            "type": "text"
-          },
-          "customer_email": {
-            "label": "Customer email",
-            "type": "text"
-          },
-          "amount": {
-            "label": "Amount",
-            "type": "currency"
-          },
-          "currency": {
-            "label": "Currency",
-            "type": "text"
-          },
-          "card_network": {
-            "label": "Network",
-            "type": "text"
-          },
-          "reason": {
-            "label": "Reason",
-            "type": "text"
-          },
-          "evidence_due_by": {
-            "label": "Evidence due",
-            "type": "date"
-          },
-          "status": {
-            "label": "Status",
-            "type": "status",
-            "tones": {
-              "needs_response": "warn",
-              "under_review": "info",
-              "won": "good",
-              "lost": "bad",
-              "accepted": "neutral"
-            }
-          },
-          "assignee": {
-            "label": "Assignee",
-            "type": "text"
-          },
-          "evidence_submission_id": {
-            "label": "Evidence submission",
-            "type": "text"
-          },
-          "win_pct": {
-            "label": "Win %",
-            "type": "number"
-          },
-          "created_at": {
-            "label": "Opened",
-            "type": "date"
-          },
-          "updated_at": {
-            "label": "Updated",
-            "type": "date"
-          }
-        }
-      },
-      {
         "name": "feature_flags",
         "pk": "id",
         "piiFields": [],
@@ -1662,9 +1578,7 @@
     ],
     "external": {
       "stripe": [
-        "refund",
-        "submitDisputeEvidence",
-        "acceptDispute"
+        "refund"
       ],
       "kycVendor": [
         "rescreen"
@@ -1744,31 +1658,6 @@
         "audit-timeline",
         "record-detail",
         "form"
-      ]
-    },
-    {
-      "slug": "chargeback-disputes",
-      "name": "Chargeback Dispute Queue",
-      "permissions": [
-        "view",
-        "work",
-        "pii.reveal",
-        "comment",
-        "export"
-      ],
-      "actions": [
-        "claim",
-        "contest",
-        "accept"
-      ],
-      "blocks": [
-        "metric-cards",
-        "review-queue",
-        "chart",
-        "data-grid",
-        "record-detail",
-        "audit-timeline",
-        "comments"
       ]
     },
     {

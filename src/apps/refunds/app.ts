@@ -3,7 +3,7 @@ import { defineApp } from "@/platform";
 export default defineApp({
   slug: "refunds",
   name: "Refunds Dashboard",
-  description: "Track refund volume, triage requests from support, and issue refunds via Stripe with Finance approval above $500.",
+  description: "Issue Stripe refunds. Over $500 needs Finance approval.",
   icon: "💸",
   category: "finance",
   owners: ["finance-lead"],

@@ -3,7 +3,7 @@ import { defineApp } from "@/platform";
 export default defineApp({
   slug: "kyc-review",
   name: "KYC Review Queue",
-  description: "Work the identity-verification queue: claim cases, review vendor results, approve/reject/escalate with four-eyes on high-risk approvals.",
+  description: "Review identity checks. High-risk approvals need Compliance.",
   icon: "🪪",
   category: "compliance",
   owners: ["ops-lead"],
