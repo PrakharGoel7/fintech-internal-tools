@@ -12,3 +12,6 @@ Rule: 1st occurrence → app-local handler. 2nd → propose extraction. 3rd or c
 | Countdown to an absolute external deadline (Stripe `evidence_due_by`); `review-queue.sla` only supported start + N hours | chargeback-disputes (1) | extended `review-queue` 1.1.0 with optional `sla.mode: "deadline"` (backwards compatible; default `elapsed`) | resolved (extend block) |
 | Ratio metrics (win rate = won / (won + lost)) — `chart` / `metric-cards` only aggregate count/sum/avg | chargeback-disputes (1) | derived `win_pct` column (100 = won, 0 = lost, null otherwise) seeded only — no sync or action sets it yet; `chart` uses `agg: avg` | app-local |
 | Time-relative conditions (e.g. "evidence due within 48h") in `metric-cards` / `where` | chargeback-disputes (1) | not built — per-item deadline badges in the queue instead | open |
+| Block an action when the actor is the record's creator (segregation of duties: entering clerk can't approve) | vendor-invoices (1) | `handlers.approveForPayment` throws when `entered_by` = current user | app-local |
+| Date input on `form` (date picker / validation) | vendor-invoices (1) | text field with `YYYY-MM-DD` placeholder | open |
+| Validation on create actions (unique vendor + invoice number, amount > 0) | vendor-invoices (1) | not built — create effects have no validation hook | open |

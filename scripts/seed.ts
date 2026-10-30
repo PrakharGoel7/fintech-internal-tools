@@ -78,5 +78,19 @@ for (let i = 1; i <= DISPUTES; i++) {
     status === "won" ? 100 : status === "lost" ? 0 : null, created, created);
 }
 
-audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES } });
+const inv = db.prepare(`INSERT INTO vendor_invoices VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`);
+const vendors = ["Northwind Office Supply", "Contoso Cloud Hosting", "Fabrikam Facilities", "Acme Logistics", "Globex Consulting", "Initech Software", "Umbrella Catering", "Wayne Security Services", "Stark Hardware", "Tyrell Data Labs"];
+const INVOICES = 36;
+for (let i = 1; i <= INVOICES; i++) {
+  const status = i <= 16 ? "pending_review" : i <= 20 ? "on_hold" : pick(["approved", "approved", "approved", "rejected"]);
+  const amount = i % 5 === 0 ? int(25001, 90000) + pick([0, 0.5]) : i === 7 ? 25000 : int(180, 24000) + pick([0, 0.25, 0.99]);
+  const created = daysAgo(int(0, 20), int(0, 23));
+  const entered = pick(["maya", "leo"]);
+  const approver = status === "approved" ? (amount > 25000 ? "erin" : entered === "maya" ? "leo" : "maya") : null;
+  const due = new Date(Date.now() + int(-3, 30) * 86400000).toISOString().slice(0, 10);
+  inv.run(`ven_${(52000000 + i * 7919).toString(36)}`, pick(vendors), `INV-${20260 + i * 13}`, amount, "USD", due,
+    `${int(100000000, 999999999)}-${int(10000000, 99999999)}${int(1000, 9999)}`, status, entered, approver, created, created);
+}
+
+audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES, vendor_invoices: INVOICES } });
 console.log(`Seeded ${file}`);
