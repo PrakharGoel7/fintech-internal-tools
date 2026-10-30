@@ -57,26 +57,5 @@ const flags: [string, string, string, number, number, number, number][] = [
 const fl = db.prepare(`INSERT INTO feature_flags VALUES (?,?,?,?,?,?,?,?,?)`);
 for (const f of flags) fl.run(...f, daysAgo(int(10, 90)), daysAgo(int(0, 9)));
 
-const dsp = db.prepare(`INSERT INTO disputes VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`);
-const disputeReasons = ["fraudulent", "product_not_received", "duplicate", "subscription_canceled", "unrecognized"];
-/** Synthetic evidence windows; real windows vary by network and are set by Stripe's `evidence_details.due_by`. */
-const evidenceWindowDays: Record<string, number> = { visa: 7, mastercard: 7, amex: 10, discover: 9 };
-const DISPUTES = 40;
-for (let i = 1; i <= DISPUTES; i++) {
-  const n = name();
-  const network = pick(["visa", "visa", "visa", "mastercard", "mastercard", "amex", "discover"]);
-  const window = evidenceWindowDays[network];
-  const status = i <= 18 ? "needs_response" : pick(["under_review", "under_review", "won", "won", "won", "lost", "lost", "accepted"]);
-  const open = status === "needs_response";
-  const amount = i % 4 === 0 || rand() < 0.15 ? int(1001, 6500) + pick([0, 0.5]) : int(15, 950) + pick([0, 0.99]);
-  const createdMs = open ? Date.now() - (int(0, window - 1) * 24 + int(0, 22)) * 3600000 : Date.now() - int(window, 60) * 86400000;
-  const created = new Date(createdMs).toISOString();
-  dsp.run(`dp_${(46000000 + i * 7919).toString(36)}`, `ch_${(910000 + i * 53).toString(36)}`, n, email(n), amount, "USD",
-    network, pick(disputeReasons), new Date(createdMs + window * 86400000).toISOString(), status,
-    open ? (i <= 5 ? pick(["alice", "bob"]) : null) : pick(["alice", "alice", "bob"]),
-    ["under_review", "won", "lost"].includes(status) ? `evs_${(80000 + i).toString(36)}` : null,
-    status === "won" ? 100 : status === "lost" ? 0 : null, created, created);
-}
-
-audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length, disputes: DISPUTES } });
+audit({ actor: "system", action: "platform.seeded", details: { kyc_cases: 48, refunds: 60, feature_flags: flags.length } });
 console.log(`Seeded ${file}`);
