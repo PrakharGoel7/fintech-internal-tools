@@ -7,7 +7,7 @@ export function NavLinks({ items, badges }: { items: [string, string][]; badges:
   return (
     <nav className="flex gap-1 text-sm">
       {items.map(([href, label]) => {
-        const active = href === "/" ? pathname === "/" || pathname.startsWith("/apps") : pathname.startsWith(href);
+        const active = href === "/" ? pathname === "/" || pathname.startsWith("/apps") : pathname === href || pathname.startsWith(`${href}/`);
         return (
           <Link key={href} href={href} className={`rounded-lg px-2.5 py-1.5 font-medium transition-colors ${active ? "bg-slate-100 text-slate-900" : "text-slate-500 hover:bg-slate-50 hover:text-slate-900"}`}>
             {label}

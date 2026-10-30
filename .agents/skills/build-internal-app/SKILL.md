@@ -46,7 +46,14 @@ Write a short spec containing:
   - after each step, state what should be true (`then`: new status, who holds it) or that it waits for approval (`expect: "waits"`), and use `approve` / `reject` steps for the checker;
   - the harness checks at the end that the audit log lists every step in order with the right person, and that nothing is left waiting for approval.
 
-**Write the scenarios and journeys as code now**, in `src/apps/<slug>/scenarios.ts` with `defineScenarios` (see `src/apps/kyc-review/scenarios.ts`): the engineer approves the tests, not a description of them. Then open a **draft PR** containing only the spec (as `src/apps/<slug>/SPEC.md` and the PR description) and `scenarios.ts`; the PR is how it lands in the engineer's lap. `npm run scenarios -- <slug>` prints the scenarios and journeys as a checklist for the description. Say in the session and the PR that you are waiting for an engineer to approve (a PR approval, or an "approved" comment) or request changes, then STOP. Apply requested changes to the spec and tests and wait again. Do not build until approved.
+**Write the scenarios and journeys as code now**, in `src/apps/<slug>/scenarios.ts` with `defineScenarios` (see `src/apps/kyc-review/scenarios.ts`): the engineer approves the tests, not a description of them.
+
+Then open a **draft PR** so it lands in the engineers' **Requests dashboard** (`/requests` in the portal):
+- branch `app-request/<ref>-<slug>`, and `App-Request: <ref>` in the PR description (the ref is in the request prompt; the dashboard finds the PR by it);
+- the PR contains only `src/apps/<slug>/SPEC.md` and `scenarios.ts`. The dashboard renders `SPEC.md` for the engineer, so it must hold the whole spec above, with **Assumptions** near the top and the scenarios and journeys as checklists (`npm run scenarios -- <slug>` prints them);
+- say you are waiting for an engineer, then STOP.
+
+The engineer's decision arrives as a message in this session (and a PR comment): "Spec approved…" → Phase 2. "Changes requested…" → update `SPEC.md` / `scenarios.ts` on the same PR, push, and wait again. Do not build until approved.
 
 ## Phase 2 — Build
 1. Create `src/apps/<slug>/app.ts` using `defineApp` (import only from `@/platform`).
@@ -66,4 +73,4 @@ A failing scenario or journey means the app disagrees with what the engineer app
 Watch the journey videos yourself before handing over; also check PII is masked and reveals are audited, and that the audit log chain still verifies.
 
 ## Phase 4 — Hand the build to the engineer
-Push the build to the same PR and mark it ready for review. Title `feat(app): <name>`. Description: the approved spec, the scenarios and journeys (`npm run scenarios -- <slug>`), the coverage table, rung used for each customization, GAPS.md changes, and **one journey video per journey** from `journey-videos/` embedded in the description (CI also uploads them as the `journey-videos` artifact). Tell the engineer the app is built and tested and that merging the PR is what puts it in production. Never merge it yourself.
+Push the build to the same PR, update `SPEC.md` if the build changed anything, and **mark the PR ready for review**. That moves it to "Build & test" in the dashboard; CI runs every scenario and plays every journey in the browser, and the dashboard shows the engineer one video per journey with pass/fail, then "Ready to ship" once CI passes. Title `feat(app): <name>`. Description: the approved spec, the scenarios and journeys, the coverage table, the rung used for each customization, and GAPS.md changes. Watch the journey videos yourself (`npm run journeys -- <slug>` locally) before marking ready. An Eng Lead pushes to production from the dashboard (that merges the PR); never merge it yourself.
