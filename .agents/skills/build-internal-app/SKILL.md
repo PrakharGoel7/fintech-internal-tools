@@ -59,9 +59,9 @@ The engineer's decision arrives as a message in this session (and a PR comment):
 1. Create `src/apps/<slug>/app.ts` using `defineApp` (import only from `@/platform`).
 2. Register it in `src/apps/registry.ts`.
 3. New data: add source + table + seed data. External systems: add a mocked op in `src/connectors/external.ts`.
-4. App-local logic goes in `handlers`. Add a `GAPS.md` row for every handler / unmet need; if the same gap already has an entry, bump its count and propose extraction.
+4. App-local logic goes in `handlers`. Add a `GAPS.md` row for every handler / unmet need; if the same gap already has an entry, this is the 2nd app: build it as a shared module instead (step 6).
 5. The approved `scenarios.ts` is the acceptance test: `tests/scenarios.test.ts` runs every scenario and journey through the real platform. Add Vitest tests only for logic scenarios can't express (e.g. handler internals).
-6. Only create a new block (use the `create-block` skill) if a gap is hit for the 3rd time or is compliance-critical.
+6. When a gap is hit by a 2nd app, or is compliance-critical, build it as a shared module: an optional option on an existing block (bump minor), or a new block via the `create-block` skill. Migrate the first app's handler to it and mark the GAPS.md row resolved.
 
 ## Phase 3 — Verify
 ```

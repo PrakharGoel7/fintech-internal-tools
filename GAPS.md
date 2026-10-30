@@ -1,7 +1,7 @@
 # Gap ledger
 
 Needs that no block covered when an app was built. Devin appends rows here instead of silently writing one-off code.
-Rule: 1st occurrence → app-local handler. 2nd → propose extraction. 3rd or compliance-critical → new block (`create-block` skill).
+Rule: 1st app → app-local handler. 2nd app, or compliance-critical → shared module: an optional option on an existing block, or a new block (`create-block` skill).
 
 | Gap | Apps (count) | Current implementation | Status |
 |---|---|---|---|
