@@ -12,6 +12,10 @@ export default defineScenarios("chargeback-disputes", [
   { says: "Submitting evidence needs a note", as: "alice", do: "contest", given: open(200), note: "", expect: "blocked", because: "note" },
   { says: "Writing off exactly $1,000 needs no approval", as: "alice", do: "accept", given: open(1000), expect: "allowed", then: { status: "accepted" } },
   { says: "Writing off $1,000.01 waits for Finance Lead approval", as: "alice", do: "accept", given: open(1000.01), expect: "needs-approval", approvers: ["finance-lead"], approvedBy: "erin", then: { status: "accepted" } },
+  { says: "When Stripe rules for us, the analyst records the win and it counts toward the win rate", as: "alice", do: "recordWon", given: { ...open(200), status: "under_review" }, expect: "allowed", then: { status: "won", win_pct: 100 } },
+  { says: "When Stripe rules against us, the analyst records the loss and it counts toward the win rate", as: "alice", do: "recordLost", given: { ...open(200), status: "under_review" }, expect: "allowed", then: { status: "lost", win_pct: 0 } },
+  { says: "An outcome can't be recorded before evidence is submitted", as: "alice", do: "recordWon", given: open(200), expect: "blocked", because: "not available" },
+  { says: "Finance leads cannot record outcomes", as: "erin", do: "recordWon", given: { ...open(200), status: "under_review" }, expect: "denied" },
   { says: "Customer name and email are masked by default", as: "alice", source: "disputes", masked: ["customer_name", "customer_email"] },
   { says: "Analysts cannot reveal customer email", as: "alice", source: "disputes", reveal: "customer_email", expect: "denied" },
   { says: "Ops leads can reveal customer email (logged)", as: "bob", source: "disputes", reveal: "customer_email", expect: "allowed" },
@@ -21,6 +25,7 @@ export default defineScenarios("chargeback-disputes", [
     steps: [
       { says: "Alice claims the dispute", as: "alice", do: "claim", then: { assignee: "alice", status: "needs_response" } },
       { says: "Alice submits proof of delivery", as: "alice", do: "contest", reason: "proof_of_delivery", then: { status: "under_review" } },
+      { says: "Stripe rules in our favour, so Alice records the win", as: "alice", do: "recordWon", then: { status: "won", win_pct: 100 } },
     ],
   },
   {

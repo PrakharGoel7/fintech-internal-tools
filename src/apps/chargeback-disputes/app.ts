@@ -42,6 +42,16 @@ export default defineApp({
         description: "Writing off a dispute over $1,000 requires Finance Lead approval",
       },
     },
+    recordWon: {
+      label: "Record win", source: "disputes", permission: "work", variant: "primary",
+      effect: { kind: "update", set: { status: "won", win_pct: 100 } },
+      availableWhen: [{ field: "status", op: "eq", value: "under_review" }],
+    },
+    recordLost: {
+      label: "Record loss", source: "disputes", permission: "work",
+      effect: { kind: "update", set: { status: "lost", win_pct: 0 } },
+      availableWhen: [{ field: "status", op: "eq", value: "under_review" }],
+    },
   },
   pages: [
     {
@@ -116,7 +126,7 @@ export default defineApp({
     {
       id: "dispute", title: "Dispute", path: "disputes/:id", nav: false,
       blocks: [
-        { type: "record-detail", width: "two-thirds", config: { source: "disputes", fields: ["charge_id", "customer_name", "customer_email", { field: "amount", format: "currency" }, "card_network", "reason", { field: "evidence_due_by", format: "datetime" }, "status", "assignee", "evidence_submission_id", { field: "created_at", format: "datetime" }], actions: ["claim", "contest", "accept"], backLink: "disputes" } },
+        { type: "record-detail", width: "two-thirds", config: { source: "disputes", fields: ["charge_id", "customer_name", "customer_email", { field: "amount", format: "currency" }, "card_network", "reason", { field: "evidence_due_by", format: "datetime" }, "status", "assignee", "evidence_submission_id", { field: "created_at", format: "datetime" }], actions: ["claim", "contest", "accept", "recordWon", "recordLost"], backLink: "disputes" } },
         { type: "audit-timeline", width: "third", title: "Decision history", config: { scope: "record", source: "disputes" } },
         { type: "comments", config: { source: "disputes" } },
       ],

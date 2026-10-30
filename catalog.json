@@ -1689,7 +1689,9 @@
       "actions": [
         "claim",
         "contest",
-        "accept"
+        "accept",
+        "recordWon",
+        "recordLost"
       ],
       "blocks": [
         "metric-cards",

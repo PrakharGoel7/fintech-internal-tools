@@ -10,5 +10,5 @@ Rule: 1st app → app-local handler. 2nd app, or compliance-critical → shared 
 | Document/image viewer for uploaded IDs | kyc-review (1) | not built — vendor result only | open |
 | Bulk actions on grid selections | refunds (1) | not built — row actions only | open |
 | Countdown to an absolute external deadline (Stripe `evidence_due_by`); `review-queue.sla` only supported start + N hours | chargeback-disputes (1) | extended `review-queue` 1.1.0 with optional `sla.mode: "deadline"` (backwards compatible; default `elapsed`) | resolved (extend block) |
-| Ratio metrics (win rate = won / (won + lost)) — `chart` / `metric-cards` only aggregate count/sum/avg | chargeback-disputes (1) | derived `win_pct` column (100 = won, 0 = lost, null otherwise) seeded only — no sync or action sets it yet; `chart` uses `agg: avg` | app-local |
+| Ratio metrics (win rate = won / (won + lost)) — `chart` / `metric-cards` only aggregate count/sum/avg | chargeback-disputes (1) | derived `win_pct` column (100 = won, 0 = lost, null otherwise), set by the `recordWon` / `recordLost` actions; `chart` uses `agg: avg` | app-local |
 | Time-relative conditions (e.g. "evidence due within 48h") in `metric-cards` / `where` | chargeback-disputes (1) | not built — per-item deadline badges in the queue instead | open |
