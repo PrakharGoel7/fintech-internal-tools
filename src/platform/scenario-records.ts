@@ -21,7 +21,7 @@ export function makeRecord(sourceName: string, given?: Values): string {
   const now = new Date().toISOString();
   const row: Values = {};
   for (const [k, f] of Object.entries(src.def.fields)) {
-    row[k] = ["number", "currency", "boolean"].includes(f.type) ? 0 : f.type === "date" ? now : f.type === "status" ? null : `${k}-${seq + 1}@example.test`;
+    row[k] = ["number", "currency", "boolean"].includes(f.type) ? 0 : f.type === "date" ? now : f.type === "status" ? null : `${f.label ?? k} ${seq + 1}`;
   }
   row[src.def.pk] = `scn_${RUN}_${++seq}`;
   Object.assign(row, resolveValues(given));

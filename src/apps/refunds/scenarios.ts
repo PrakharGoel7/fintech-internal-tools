@@ -18,14 +18,14 @@ export default defineScenarios("refunds", [
   {
     says: "Support requests a small refund and an ops lead issues it",
     steps: [
-      { says: "Sam requests a $40 refund", as: "sam", do: "requestRefund", input: { charge_id: "ch_journey_small", customer_name: "Journey Customer", email: "j@example.test", amount: 40, reason: "duplicate_charge" }, then: { status: "requested", requested_by: "sam" } },
+      { says: "Sam requests a $40 refund", as: "sam", do: "requestRefund", input: { charge_id: "ch_journey_small_$unique", customer_name: "Journey Customer", email: "j@example.test", amount: 40, reason: "duplicate_charge" }, then: { status: "requested", requested_by: "sam" } },
       { says: "Bob issues it", as: "bob", do: "issueRefund", reason: "verified_duplicate", then: { status: "issued" } },
     ],
   },
   {
     says: "A large refund waits for Finance and is issued once Erin approves",
     steps: [
-      { says: "Sam requests a $900 refund", as: "sam", do: "requestRefund", input: { charge_id: "ch_journey_large", customer_name: "Journey Customer", email: "j@example.test", amount: 900, reason: "service_outage" }, then: { status: "requested" } },
+      { says: "Sam requests a $900 refund", as: "sam", do: "requestRefund", input: { charge_id: "ch_journey_large_$unique", customer_name: "Journey Customer", email: "j@example.test", amount: 900, reason: "service_outage" }, then: { status: "requested" } },
       { says: "Bob issues it; it waits for a Finance Lead", as: "bob", do: "issueRefund", expect: "waits", then: { status: "requested" } },
       { says: "Erin approves in Approvals and the refund is issued", as: "erin", approve: true, then: { status: "issued" } },
     ],
@@ -33,7 +33,7 @@ export default defineScenarios("refunds", [
   {
     says: "Finance rejects a large refund, so the ops lead denies it",
     steps: [
-      { says: "Sam requests a $900 refund", as: "sam", do: "requestRefund", input: { charge_id: "ch_journey_denied", customer_name: "Journey Customer", email: "j@example.test", amount: 900, reason: "customer_request" } },
+      { says: "Sam requests a $900 refund", as: "sam", do: "requestRefund", input: { charge_id: "ch_journey_denied_$unique", customer_name: "Journey Customer", email: "j@example.test", amount: 900, reason: "customer_request" } },
       { says: "Bob issues it; it waits for a Finance Lead", as: "bob", do: "issueRefund", expect: "waits" },
       { says: "Erin rejects it; the refund stays Requested", as: "erin", reject: true, then: { status: "requested" } },
       { says: "Bob denies the refund: outside policy", as: "bob", do: "denyRefund", reason: "outside_policy", then: { status: "denied" } },

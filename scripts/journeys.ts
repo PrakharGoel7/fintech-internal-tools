@@ -88,6 +88,7 @@ async function play(page: Page, app: AppModule, j: Journey) {
       }
       const btn = page.locator(`[data-action="${step.do}"][data-record="${isCreate ? "" : recordId}"]`).first();
       const before = recordId ? src.getRaw(recordId) : null;
+      const existing = new Set(isCreate ? src.listRaw({ limit: 100000 }).map((r) => String(r[src.def.pk])) : []);
       if (step.expect === "blocked") {
         const offered = (await btn.count()) > 0 && (await btn.isEnabled());
         if (offered) throw new Error(`step ${i + 1}: "${action.label}" is still offered`);
@@ -109,8 +110,9 @@ async function play(page: Page, app: AppModule, j: Journey) {
         if (!(await until(() => listApprovals({ status: "pending" }).some((a) => a.record_id === recordId && a.action_id === step.do))))
           throw new Error(`step ${i + 1}: no approval request was created`);
       } else if (isCreate) {
-        await until(() => !!src.listRaw({ limit: 500 }).find((r) => matches(r, input)));
-        const row = src.listRaw({ limit: 500 }).find((r) => matches(r, input));
+        const created = () => src.listRaw({ limit: 100000 }).find((r) => !existing.has(String(r[src.def.pk])) && matches(r, input));
+        await until(() => !!created());
+        const row = created();
         if (!row) throw new Error(`step ${i + 1}: record was not created`);
         recordId = String(row[src.def.pk]);
       } else if (!step.then) {
