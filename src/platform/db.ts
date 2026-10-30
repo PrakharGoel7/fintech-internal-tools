@@ -64,6 +64,21 @@ CREATE TABLE IF NOT EXISTS app_requests (
 );
 `;
 
+/** Additive column migrations for databases created by an older schema. */
+const COLUMNS: [table: string, column: string, ddl: string][] = [
+  ["app_requests", "ref", "TEXT"],
+  ["app_requests", "spec_decision", "TEXT"],
+  ["app_requests", "spec_decision_sha", "TEXT"],
+  ["app_requests", "spec_decision_by", "TEXT"],
+  ["app_requests", "shipped_by", "TEXT"],
+];
+function migrate(db: DatabaseSync) {
+  for (const [table, column, ddl] of COLUMNS) {
+    const cols = (db.prepare(`PRAGMA table_info(${table})`).all() as { name: string }[]).map((c) => c.name);
+    if (!cols.includes(column)) db.exec(`ALTER TABLE ${table} ADD COLUMN ${column} ${ddl}`);
+  }
+}
+
 const g = globalThis as unknown as { __db?: DatabaseSync };
 const tableDdl: string[] = [];
 
@@ -80,6 +95,7 @@ export function getDb(): DatabaseSync {
     const db = new DatabaseSync(file);
     db.exec("PRAGMA journal_mode = WAL;");
     db.exec(SCHEMA);
+    migrate(db);
     for (const ddl of tableDdl) db.exec(ddl);
     g.__db = db;
   }

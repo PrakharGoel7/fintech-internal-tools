@@ -28,7 +28,7 @@ async function visit(url: string, uid: string) {
 
 async function main() {
 await waitForServer();
-for (const u of USERS) for (const p of ["/", "/approvals", "/audit", "/catalog", "/request"]) await visit(p, u.id);
+for (const u of USERS) for (const p of ["/", "/approvals", "/audit", "/catalog", "/request", "/requests"]) await visit(p, u.id);
 for (const app of apps) {
   for (const u of USERS.filter((x) => can(x, app, "view"))) {
     for (const page of app.pages) {

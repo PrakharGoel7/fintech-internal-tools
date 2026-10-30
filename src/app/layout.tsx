@@ -4,6 +4,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { getCurrentUser } from "./session";
 import { USERS, listApprovals, canDecide } from "@/platform";
+import { canReviewRequests } from "@/platform/requests";
 import { UserSwitcher } from "@/components/UserSwitcher";
 import { NavLinks } from "@/components/NavLinks";
 import { Toaster } from "@/components/Toaster";
@@ -17,6 +18,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
   const user = await getCurrentUser();
   const mine = listApprovals({ status: "pending" }).filter((a) => canDecide(user, a).ok).length;
   const nav: [string, string][] = [["/", "Apps"], ["/approvals", "Approvals"], ["/audit", "Audit log"], ["/catalog", "Module catalog"], ["/request", "Request an app"]];
+  if (canReviewRequests(user)) nav.push(["/requests", "Requests"]);
   return (
     <html lang="en" className={inter.variable}>
       <body className="min-h-screen font-sans">

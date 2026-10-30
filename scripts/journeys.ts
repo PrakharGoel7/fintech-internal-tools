@@ -162,6 +162,7 @@ async function main() {
     }
   }
   await browser.close();
+  fs.writeFileSync(path.join(OUT, "report.json"), JSON.stringify(results, null, 2));
   fs.writeFileSync(path.join(OUT, "report.md"), `# Journey videos\n\n| App | Journey | Result | Video |\n|---|---|---|---|\n${results.map((r) => `| ${r.app} | ${r.journey} | ${r.ok ? "passed" : `FAILED: ${r.error}`} | ${r.video} |`).join("\n")}\n`);
   const failed = results.filter((r) => !r.ok).length;
   console.log(`\n${results.length - failed}/${results.length} journeys passed in the browser. Videos: ${path.relative(process.cwd(), OUT)}/`);

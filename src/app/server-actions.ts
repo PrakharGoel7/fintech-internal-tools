@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import { getCurrentUser } from "./session";
 import { getApp } from "@/apps/registry";
 import { runAction, decideApproval, revealPii, addComment, verifyAuditChain, audit, getUser } from "@/platform";
-import { submitAppRequest, type AppRequestInput } from "@/platform/requests";
+import { submitAppRequest, decideSpec, shipRequest, type AppRequestInput } from "@/platform/requests";
 
 type Result = { ok: boolean; message: string; pending?: boolean; value?: string };
 
@@ -65,5 +65,21 @@ export async function submitAppRequestAction(input: AppRequestInput): Promise<Re
     const user = await getCurrentUser();
     const r = await submitAppRequest(user, input);
     return { ok: true, message: r.message, prompt: r.prompt, issueUrl: r.issueUrl, sessionUrl: r.sessionUrl };
+  } catch (e) { return fail(e); }
+}
+
+export async function decideSpecAction(args: { id: number; decision: "approved" | "changes_requested"; comment: string }): Promise<Result> {
+  try {
+    const user = await getCurrentUser();
+    const { problems } = await decideSpec(user, args.id, args.decision, args.comment);
+    const msg = args.decision === "approved" ? "Spec approved; Devin is building the app" : "Changes sent to Devin";
+    return { ok: true, message: problems.length ? `${msg} (warning: ${problems.join("; ")})` : msg };
+  } catch (e) { return fail(e); }
+}
+
+export async function shipRequestAction(args: { id: number }): Promise<Result> {
+  try {
+    await shipRequest(await getCurrentUser(), args.id);
+    return { ok: true, message: "Merged: the app is live" };
   } catch (e) { return fail(e); }
 }
