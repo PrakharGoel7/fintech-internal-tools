@@ -1228,7 +1228,7 @@
     },
     {
       "name": "audit-timeline",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "governance",
       "summary": "Read-only view of the tamper-evident audit log, scoped to the app or to one record.",
       "useWhen": [

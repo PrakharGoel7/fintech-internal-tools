@@ -10,7 +10,7 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "audit-timeline",
-  version: "1.0.0",
+  version: "1.0.1",
   category: "governance",
   summary: "Read-only view of the tamper-evident audit log, scoped to the app or to one record.",
   useWhen: ["Showing who did what (record history, app activity feed)"],
