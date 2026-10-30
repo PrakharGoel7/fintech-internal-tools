@@ -61,40 +61,46 @@ export default function Catalog() {
   );
 }
 
-const GAP_TONE: Record<string, string> = { open: "bg-amber-50 text-amber-800 ring-amber-600/25", "app-local": "bg-sky-50 text-sky-700 ring-sky-600/20", resolved: "bg-emerald-50 text-emerald-700 ring-emerald-600/20" };
 
 function Inline({ text }: { text: string }) {
   return <>{text.split(/(`[^`]+`)/).map((t, i) => (t.startsWith("`") && t.endsWith("`") ? <code key={i} className="rounded bg-slate-100 px-1 py-0.5 font-mono text-[11px] text-slate-700">{t.slice(1, -1)}</code> : t))}</>;
 }
 
+const GAP_STATUS: Record<string, { label: string; cls: string }> = {
+  "app-local": { label: "Built for one app", cls: "bg-sky-50 text-sky-700 ring-sky-600/20" },
+  resolved: { label: "Now a shared module", cls: "bg-emerald-50 text-emerald-700 ring-emerald-600/20" },
+};
+
+/** GAPS.md stays the source of truth; this view shows it in plain language. */
 function GapLedger({ md }: { md: string }) {
-  const lines = md.split("\n").map((l) => l.trim());
-  const cells = (l: string) => l.replace(/^\||\|$/g, "").split("|").map((c) => c.trim());
-  const rows = lines.filter((l) => l.startsWith("|") && !/^\|[\s|:-]+\|$/.test(l)).map(cells);
-  const [head, ...body] = rows;
-  const notes = lines.filter((l) => l && !l.startsWith("|") && !l.startsWith("#"));
+  const rows = md.split("\n").map((l) => l.trim())
+    .filter((l) => l.startsWith("|") && !/^\|[\s|:-]+\|$/.test(l))
+    .map((l) => l.replace(/^\||\|$/g, "").split("|").map((c) => c.trim()))
+    .slice(1)
+    .filter((r) => GAP_STATUS[r[3]?.match(/^[\w-]+/)?.[0] ?? ""]);
   return (
     <section>
       <h2 className="eyebrow mb-2">Gap ledger</h2>
       <div className="card overflow-hidden">
-        <div className="space-y-1 border-b border-slate-100 px-4 py-3 text-sm text-slate-600">{notes.map((n) => <p key={n}><Inline text={n} /></p>)}</div>
-        {head && (
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-sm">
-              <thead className="table-head border-b border-slate-100 text-left"><tr>{head.map((h) => <th key={h} className="px-4 py-2">{h}</th>)}</tr></thead>
-              <tbody className="divide-y divide-slate-100 align-top">
-                {body.map((r) => (
-                  <tr key={r[0]}>
-                    {r.map((c, i) => {
-                      const status = c.match(/^([\w-]+)/)?.[1] ?? "";
-                      return <td key={i} className={`px-4 py-2.5 ${i === 0 ? "font-medium text-slate-800" : "text-slate-600"}`}>{i === r.length - 1 && GAP_TONE[status] ? <span className={`badge whitespace-nowrap ${GAP_TONE[status]}`}>{c}</span> : <Inline text={c} />}</td>;
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+        <p className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600">When an app needs something no module covers, Devin logs it here instead of quietly writing one-off code. Once enough apps need it, it becomes a shared module.</p>
+        <div className="flex flex-wrap gap-2 border-b border-slate-100 px-4 py-2 text-xs text-slate-500">
+          {Object.values(GAP_STATUS).map((s) => <span key={s.label} className={`badge ${s.cls}`}>{s.label}</span>)}
+        </div>
+        <table className="min-w-full text-sm">
+          <thead className="table-head border-b border-slate-100 text-left"><tr><th className="px-4 py-2">Need</th><th className="px-4 py-2">Apps</th><th className="px-4 py-2">Status</th></tr></thead>
+          <tbody className="divide-y divide-slate-100 align-top">
+            {rows.map(([need, apps, how, status]) => {
+              const st = GAP_STATUS[status?.match(/^[\w-]+/)?.[0] ?? ""];
+              return (
+                <tr key={need}>
+                  <td className="px-4 py-2.5"><div className="font-medium text-slate-800"><Inline text={need} /></div><div className="mt-0.5 text-xs text-slate-400"><Inline text={how ?? ""} /></div></td>
+                  <td className="px-4 py-2.5 whitespace-nowrap text-slate-600">{(apps ?? "").replace(/\s*\([^)]*\)/g, "")}</td>
+                  <td className="px-4 py-2.5">{st ? <span className={`badge whitespace-nowrap ${st.cls}`}>{st.label}</span> : status}</td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
       </div>
     </section>
   );
