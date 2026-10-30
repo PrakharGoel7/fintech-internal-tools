@@ -19,7 +19,7 @@ export default async function Approvals() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Approvals</h1>
-        <p className="mt-1 text-sm text-slate-500">Maker-checker inbox shared by every app. Requesters can never approve their own requests.</p>
+        <p className="mt-1 text-sm text-slate-500">Actions waiting on a second person. You can’t approve your own.</p>
       </div>
       <div className="space-y-3">
         {pending.map((a) => {
@@ -33,7 +33,7 @@ export default async function Approvals() {
                 <div>
                   <div className="text-sm"><span className="font-semibold">{app.actions[a.action_id]?.label}</span> · {appName(a.app)} · <span className="chip">{a.record_id ?? "new record"}</span></div>
                   <div className="mt-1 text-xs text-slate-500">Requested by <b>{getUser(a.requested_by).name}</b> {relative(a.ts)} · reason <b>{a.reason?.replace(/_/g, " ") ?? "—"}</b>{a.note && <> · “{a.note}”</>}</div>
-                  <div className="mt-1.5 text-xs font-medium text-amber-700">Rule: {a.rule} → needs {a.approver_roles.join(" / ")}</div>
+                  <div className="mt-1.5 text-xs font-medium text-amber-700">Needs {a.approver_roles.join(" or ")} · {a.rule}</div>
                   {rec && <div className="mt-2 text-xs text-slate-600">{String(rec[src.def.titleField])}{ruleFields(app.actions[a.action_id]?.approval?.when).map((f) => <span key={f}> · {src.def.fields[f]?.label ?? f} <b>{formatPlain(rec[f], (src.def.fields[f]?.type ?? "text") as Format)}</b></span>)}</div>}
                   {!rec && Object.keys(a.input).length > 0 && <div className="mt-2 font-mono text-xs text-slate-600">{JSON.stringify(a.input)}</div>}
                 </div>
@@ -42,7 +42,7 @@ export default async function Approvals() {
             </div>
           );
         })}
-        {pending.length === 0 && <div className="rounded-xl border border-dashed border-slate-300 bg-white/50 p-8 text-center text-sm text-slate-400">No pending approvals</div>}
+        {pending.length === 0 && <div className="rounded-xl border border-dashed border-slate-300 bg-white/50 p-8 text-center text-sm text-slate-400">Nothing waiting for approval</div>}
       </div>
       {done.length > 0 && (
         <div>
@@ -51,8 +51,8 @@ export default async function Approvals() {
             {done.map((a) => (
               <div key={a.id} className="flex flex-wrap items-center gap-x-4 px-4 py-2.5">
                 <span className={`badge ${TONE_CLS[a.status === "approved" ? "good" : "bad"]}`}>{a.status}</span>
-                <span>{appName(a.app)} · {a.action_id} · <span className="chip">{a.record_id}</span></span>
-                <span className="text-slate-500">maker {a.requested_by} → checker {a.decided_by}</span>
+                <span>{apps.find((x) => x.slug === a.app)?.actions[a.action_id]?.label ?? a.action_id} · {appName(a.app)} · <span className="chip">{a.record_id}</span></span>
+                <span className="text-slate-500">Requested by {getUser(a.requested_by).name} · decided by {a.decided_by ? getUser(a.decided_by).name : "—"}</span>
               </div>
             ))}
           </div>
