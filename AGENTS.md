@@ -22,10 +22,12 @@ This repo is an internal-tools platform. Apps are **config files composed from r
 
 7. **Blocks and the platform stay domain-agnostic.** No source names, field names, thresholds or status vocabulary in `src/platform/`, `src/blocks/` (outside manifest examples) or portal routes. Put them in app config (e.g. `review-queue.badges`, approval `when`) or the `SourceDef` (`fields[x].tones`). A block option is justified only if a second app could plausibly use it with different values. `npm run boundaries` rejects source names in shared code.
 8. **Style with the shared design tokens.** Use the classes and colours in `src/app/globals.css` (`card`, `card-title`, `eyebrow`, `btn btn-sm btn-primary|secondary|danger`, `input`, `badge` + `TONE_CLS`, `table-head`, `chip`, `link`, `brand-*`). Don't hard-code new palettes or one-off button/card styles in blocks or apps; restyle the portal by editing the tokens.
+9. **Requesters are never asked questions; engineers approve.** For app requests, record ambiguities as assumptions (stricter option for approvals/PII), have an engineer approve the spec and its scenarios + journeys (as code, in a draft PR) before building, and hand over the built PR with a video of every journey. Merging the PR is the push to production and is the engineer's decision. See `.agents/skills/build-internal-app/SKILL.md`.
 
 ## Before opening a PR
 ```
-npm run check   # typecheck, lint, boundaries, validate-apps, catalog freshness, tests (incl. every app's src/apps/<slug>/scenarios.ts), module-graph.json freshness
+npm run check   # typecheck, lint, boundaries, validate-apps, catalog freshness, tests (incl. every app's src/apps/<slug>/scenarios.ts: scenarios + journeys), module-graph.json freshness
+npm start & npm run smoke && npm run journeys   # page loads, then every journey played in the browser with a video each (journey-videos/)
 npm run build
 ```
 Regenerate `catalog.json` with `npm run catalog` whenever blocks/connectors/apps change.

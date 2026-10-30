@@ -30,7 +30,7 @@ Approvals needed: ${req.approvals || "none stated"}
 Sensitive data: ${req.sensitive.join(", ") || "none stated"}
 Urgency: ${req.urgency}
 
-Start with Phase 1 (spec + gap analysis). Include the plain-language "Scenarios to confirm" and yes/no questions for the requester, and post the spec for approval before building. Confirmed scenarios become the app's automated tests.`;
+Start with Phase 1. The requester is not technical: do not ask them questions; record every ambiguity as an assumption (stricter option for approvals and PII). Write the spec plus the scenarios and journeys as tests, open a draft PR for an engineer to approve, and do not build until an engineer approves it. When built, hand the engineer the PR with a video of every journey; the engineer decides when to merge to production.`;
 }
 
 export async function submitAppRequest(user: User, req: AppRequestInput) {

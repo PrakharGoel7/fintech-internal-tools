@@ -35,11 +35,36 @@ export type Scenario =
   | (Base & ActionStep & { expect: "allowed" | "denied" | "blocked"; /** Case-insensitive pattern the error must match. */ because?: string })
   | (Base & ActionStep & { expect: "needs-approval"; approvers?: Role[]; approvedBy?: string; rejectedBy?: string });
 
-export interface ScenarioSet {
-  app: string;
-  scenarios: Scenario[];
+export type JourneyStep = { /** Plain-language step, e.g. "Tom escalates the alert to compliance". */ says: string; as: string } & (
+  | (Omit<ActionStep, "then"> & {
+      /** "done" (default): it happens now. "waits": it goes to Approvals and nothing changes yet. "blocked": it is refused. */
+      expect?: "done" | "waits" | "blocked";
+      then?: Values;
+    })
+  | { approve: true; then?: Values }
+  | { reject: true; then?: Values }
+);
+
+/**
+ * A journey takes ONE record through the whole process, step by step, as the real people involved.
+ * It starts from a brand-new record (`given`, in the first status) or from a create step, and after the last
+ * step the harness also checks the record's audit log lists every step in order, with the right person.
+ */
+export interface Journey {
+  says: string;
+  /** Starting record, in the first status of the flow. Omit when the first step creates the record. */
+  given?: Values;
+  source?: string;
+  steps: JourneyStep[];
 }
 
-export function defineScenarios(app: string, scenarios: Scenario[]): ScenarioSet {
+export const isJourney = (s: Scenario | Journey): s is Journey => "steps" in s;
+
+export interface ScenarioSet {
+  app: string;
+  scenarios: (Scenario | Journey)[];
+}
+
+export function defineScenarios(app: string, scenarios: (Scenario | Journey)[]): ScenarioSet {
   return { app, scenarios };
 }

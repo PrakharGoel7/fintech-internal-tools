@@ -27,7 +27,7 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "review-queue",
-  version: "2.0.0",
+  version: "2.0.1",
   category: "workflow",
   summary: "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
   useWhen: ["Humans process items one at a time and record a decision (KYC, disputes, fraud alerts, content review)", "Work needs ownership and SLA tracking", "Items have an external hard deadline (sla.mode = deadline)"],

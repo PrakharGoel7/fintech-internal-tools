@@ -16,4 +16,39 @@ export default defineScenarios("kyc-review", [
   { says: "Email, SSN and date of birth are masked by default", as: "alice", source: "kyc_cases", masked: ["email", "ssn_last4", "dob"] },
   { says: "Analysts cannot reveal the SSN", as: "alice", source: "kyc_cases", reveal: "ssn_last4", expect: "denied" },
   { says: "Ops leads can reveal the SSN (logged)", as: "bob", source: "kyc_cases", reveal: "ssn_last4", expect: "allowed" },
+  {
+    says: "A low-risk case is claimed and approved by the analyst",
+    given: { status: "pending", risk_score: 30 },
+    steps: [
+      { says: "Alice claims the case", as: "alice", do: "claim", then: { status: "in_review", assignee: "alice" } },
+      { says: "Alice approves it: documents verified", as: "alice", do: "approve", reason: "documents_verified", then: { status: "approved" } },
+    ],
+  },
+  {
+    says: "A high-risk approval goes to Compliance, and Carol signs it off",
+    given: { status: "pending", risk_score: 85 },
+    steps: [
+      { says: "Alice claims the case", as: "alice", do: "claim", then: { status: "in_review" } },
+      { says: "Alice approves it; it waits for Compliance", as: "alice", do: "approve", expect: "waits", then: { status: "in_review" } },
+      { says: "Carol approves in Approvals and the case is approved", as: "carol", approve: true, then: { status: "approved" } },
+    ],
+  },
+  {
+    says: "Compliance rejects a high-risk approval, so the analyst escalates the case instead",
+    given: { status: "pending", risk_score: 85 },
+    steps: [
+      { says: "Alice claims the case", as: "alice", do: "claim" },
+      { says: "Alice approves it; it waits for Compliance", as: "alice", do: "approve", expect: "waits" },
+      { says: "Carol rejects the approval; the case stays In review", as: "carol", reject: true, then: { status: "in_review" } },
+      { says: "Alice escalates it with a note; it goes to Carol", as: "alice", do: "escalate", then: { status: "escalated", assignee: "carol" } },
+    ],
+  },
+  {
+    says: "A case with mismatched documents is rejected",
+    given: { status: "pending", risk_score: 40 },
+    steps: [
+      { says: "Alice claims the case", as: "alice", do: "claim" },
+      { says: "Alice rejects it: document mismatch", as: "alice", do: "reject", reason: "document_mismatch", then: { status: "rejected" } },
+    ],
+  },
 ]);

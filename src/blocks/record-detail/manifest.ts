@@ -12,7 +12,7 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "record-detail",
-  version: "1.0.0",
+  version: "1.0.1",
   category: "data",
   summary: "Single-record view with PII masking + audited reveal and guarded actions.",
   useWhen: ["Showing all fields of one record", "Taking actions on a specific record"],
