@@ -8,6 +8,7 @@ import { getAppRequest, loadRequestState, canReviewRequests, canShip, STAGES, SH
 import { pullFiles, fileAt, journeyVideos } from "@/platform/github";
 import { relative, TONE_CLS } from "@/blocks/_shared/format";
 import { SpecReview, ShipButton } from "./ReviewButtons";
+import { JourneyVideo } from "./JourneyVideo";
 
 const STEPS: { label: string; stages: Stage[] }[] = [
   { label: "Requested", stages: ["submitted", "drafting"] },
@@ -85,7 +86,7 @@ export default async function RequestDetail({ params }: { params: Promise<{ id: 
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
             {videos.map((v) => (
               <figure key={v.video} className="card overflow-hidden">
-                <video controls preload="metadata" className="w-full bg-slate-900" src={`/api/journey-videos/${pull!.headSha}/${encodeURIComponent(v.video)}`} />
+                <JourneyVideo src={`/api/journey-videos/${pull!.headSha}/${encodeURIComponent(v.video)}`} />
                 <figcaption className="flex items-start gap-2 p-3 text-sm">
                   <span className={`badge ${TONE_CLS[v.ok ? "good" : "bad"]}`}>{v.ok ? "passed" : "failed"}</span>
                   <span className="text-slate-700">{v.journey}{v.error && <span className="block text-xs text-rose-600">{v.error}</span>}</span>
