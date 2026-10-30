@@ -37,7 +37,7 @@ export default async function AppPage({ params, searchParams }: { params: Promis
         <AppIcon app={app} size="lg" />
         <div>
           <h1 className="text-xl font-semibold tracking-tight">{app.name}</h1>
-          <p className="mt-0.5 text-xs text-slate-500">config <code className="chip">src/apps/{app.slug}/app.ts</code></p>
+          <p className="mt-0.5 text-xs text-slate-500">{app.category}</p>
         </div>
         <nav className="ml-auto flex gap-1 rounded-lg bg-slate-200/60 p-1 text-sm font-medium">
           {app.pages.filter((p) => p.nav && !p.path.includes(":")).map((p) => (
