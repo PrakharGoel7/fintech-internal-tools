@@ -94,7 +94,7 @@ function GapLedger({ md }: { md: string }) {
     <section>
       <h2 className="eyebrow mb-2">Gap ledger</h2>
       <div className="card overflow-hidden">
-        <p className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600">When an app needs something no module covers, Devin logs it here instead of quietly writing one-off code. Once enough apps need it, it becomes a shared module.</p>
+        <p className="border-b border-slate-100 px-4 py-3 text-sm text-slate-600">When an app needs something no module covers, Devin logs it here instead of quietly writing one-off code. Once a second app needs it, it becomes a shared module.</p>
         <div className="flex flex-wrap gap-2 border-b border-slate-100 px-4 py-2 text-xs text-slate-500">
           {Object.values(GAP_STATUS).map((s) => <span key={s.label} className={`badge ${s.cls}`}>{s.label}</span>)}
         </div>
