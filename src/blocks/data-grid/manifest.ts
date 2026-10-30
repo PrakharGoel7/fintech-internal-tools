@@ -16,7 +16,7 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "data-grid",
-  version: "1.0.0",
+  version: "1.0.1",
   category: "data",
   summary: "Searchable, filterable table over a data source with row actions and audited CSV export.",
   useWhen: ["Browsing or searching a list of records", "Running an action on individual rows", "Exporting data for analysis"],

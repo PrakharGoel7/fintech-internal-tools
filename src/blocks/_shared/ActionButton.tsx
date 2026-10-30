@@ -22,7 +22,7 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
 
   if (!meta.allowed) {
     return (
-      <button disabled title={`You don't have permission to ${meta.label.toLowerCase()}`} className={`btn ${pad} cursor-not-allowed border border-dashed border-slate-300 text-slate-400`}>
+      <button disabled data-action={meta.id} data-record={recordId ?? ""} title={`You don't have permission to ${meta.label.toLowerCase()}`} className={`btn ${pad} cursor-not-allowed border border-dashed border-slate-300 text-slate-400`}>
         {children ?? meta.label}
       </button>
     );
@@ -41,7 +41,7 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
 
   return (
     <>
-      <button onClick={() => { setKey(crypto.randomUUID()); setOpen(true); }} className={children ? "rounded-full focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:outline-none" : `btn ${pad} ${VARIANT[meta.variant]}`}>
+      <button data-action={meta.id} data-record={recordId ?? ""} onClick={() => { setKey(crypto.randomUUID()); setOpen(true); }} className={children ? "rounded-full focus-visible:ring-2 focus-visible:ring-brand-500/40 focus-visible:outline-none" : `btn ${pad} ${VARIANT[meta.variant]}`}>
         {children ?? meta.label}
       </button>
       {open && (
@@ -57,7 +57,7 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
             {meta.reasonCodes.length > 0 && (
               <label className="mt-4 block text-sm font-medium text-slate-700">
                 Reason code <span className="text-rose-600">*</span>
-                <select value={reason} onChange={(e) => setReason(e.target.value)} className="input mt-1 block w-full">
+                <select name="reason" value={reason} onChange={(e) => setReason(e.target.value)} className="input mt-1 block w-full">
                   <option value="">Select…</option>
                   {meta.reasonCodes.map((r) => <option key={r} value={r}>{r.replace(/_/g, " ")}</option>)}
                 </select>
@@ -65,12 +65,12 @@ export function ActionButton({ appSlug, meta, recordId, input, children, size = 
             )}
             <label className="mt-3 block text-sm font-medium text-slate-700">
               Note {meta.requireNote && <span className="text-rose-600">*</span>}
-              <textarea value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="input mt-1 block w-full" placeholder="Context for the audit log" />
+              <textarea name="note" value={note} onChange={(e) => setNote(e.target.value)} rows={2} className="input mt-1 block w-full" placeholder="Context for the audit log" />
             </label>
             <p className="mt-3 text-xs text-slate-500">This action is recorded in the tamper-evident audit log.</p>
             <div className="mt-4 flex justify-end gap-2">
               <button onClick={() => setOpen(false)} disabled={busy} className="btn btn-sm btn-secondary">Cancel</button>
-              <button onClick={submit}
+              <button data-confirm onClick={submit}
                 disabled={busy || (meta.reasonCodes.length > 0 && !reason) || (meta.requireNote && !note.trim())}
                 className={`btn btn-sm ${VARIANT[meta.variant === "default" ? "primary" : meta.variant]}`}>
                 {busy ? "Working…" : meta.approvalRule ? "Submit for approval" : "Confirm"}

@@ -3,7 +3,7 @@
   "blocks": [
     {
       "name": "data-grid",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "data",
       "summary": "Searchable, filterable table over a data source with row actions and audited CSV export.",
       "useWhen": [
@@ -224,7 +224,7 @@
     },
     {
       "name": "record-detail",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "data",
       "summary": "Single-record view with PII masking + audited reveal and guarded actions.",
       "useWhen": [
@@ -344,7 +344,7 @@
     },
     {
       "name": "review-queue",
-      "version": "2.0.0",
+      "version": "2.0.1",
       "category": "workflow",
       "summary": "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
       "useWhen": [
@@ -1023,7 +1023,7 @@
     },
     {
       "name": "toggle-matrix",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "governance",
       "summary": "Grid of on/off switches (rows × environments/regions) where each flip is a guarded, audited action — maker-checker per column.",
       "useWhen": [
@@ -1125,7 +1125,7 @@
     },
     {
       "name": "form",
-      "version": "1.0.0",
+      "version": "1.0.1",
       "category": "input",
       "summary": "Typed input form that creates a record through a guarded action (reason codes, maker-checker and audit apply).",
       "useWhen": [

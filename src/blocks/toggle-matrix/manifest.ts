@@ -12,7 +12,7 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "toggle-matrix",
-  version: "1.0.0",
+  version: "1.0.1",
   category: "governance",
   summary: "Grid of on/off switches (rows × environments/regions) where each flip is a guarded, audited action — maker-checker per column.",
   useWhen: ["Feature flags per environment", "Per-region/product kill switches", "Entitlements matrices"],

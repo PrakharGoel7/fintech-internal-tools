@@ -17,7 +17,7 @@ export const configSchema = z.object({
 
 export const manifest: BlockManifest<typeof configSchema> = {
   name: "form",
-  version: "1.0.0",
+  version: "1.0.1",
   category: "input",
   summary: "Typed input form that creates a record through a guarded action (reason codes, maker-checker and audit apply).",
   useWhen: ["Submitting a new request/record (refund request, access request, incident)"],

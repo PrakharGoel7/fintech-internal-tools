@@ -16,14 +16,14 @@ export function FormView({ appSlug, meta, fields, submitLabel }: { appSlug: stri
         <label key={f.name} className="block text-sm font-medium text-slate-700">
           {f.label} {f.required && <span className="text-rose-600">*</span>}
           {f.type === "textarea" ? (
-            <textarea rows={3} className={cls} placeholder={f.placeholder} value={values[f.name] ?? ""} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} />
+            <textarea name={f.name} rows={3} className={cls} placeholder={f.placeholder} value={values[f.name] ?? ""} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} />
           ) : f.type === "select" ? (
-            <select className={cls} value={values[f.name] ?? ""} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })}>
+            <select name={f.name} className={cls} value={values[f.name] ?? ""} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })}>
               <option value="">Select…</option>
               {f.options?.map((o) => <option key={o} value={o}>{o.replace(/_/g, " ")}</option>)}
             </select>
           ) : (
-            <input type={f.type} className={cls} placeholder={f.placeholder} value={values[f.name] ?? ""} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} />
+            <input name={f.name} type={f.type} className={cls} placeholder={f.placeholder} value={values[f.name] ?? ""} onChange={(e) => setValues({ ...values, [f.name]: e.target.value })} />
           )}
         </label>
       ))}

@@ -28,7 +28,7 @@ export default async function Approvals() {
           const rec = a.record_id ? src.get(a.record_id) : null;
           const check = canDecide(user, a);
           return (
-            <div key={a.id} className="card border-l-4 border-l-amber-400 p-4">
+            <div key={a.id} data-approval-record={a.record_id ?? ""} className="card border-l-4 border-l-amber-400 p-4">
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                   <div className="text-sm"><span className="font-semibold">{app.actions[a.action_id]?.label}</span> · {appName(a.app)} · <span className="chip">{a.record_id ?? "new record"}</span></div>

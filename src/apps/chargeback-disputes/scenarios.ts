@@ -15,4 +15,31 @@ export default defineScenarios("chargeback-disputes", [
   { says: "Customer name and email are masked by default", as: "alice", source: "disputes", masked: ["customer_name", "customer_email"] },
   { says: "Analysts cannot reveal customer email", as: "alice", source: "disputes", reveal: "customer_email", expect: "denied" },
   { says: "Ops leads can reveal customer email (logged)", as: "bob", source: "disputes", reveal: "customer_email", expect: "allowed" },
+  {
+    says: "An analyst claims a dispute and submits evidence before the deadline",
+    given: open(300),
+    steps: [
+      { says: "Alice claims the dispute", as: "alice", do: "claim", then: { assignee: "alice", status: "needs_response" } },
+      { says: "Alice submits proof of delivery", as: "alice", do: "contest", reason: "proof_of_delivery", then: { status: "under_review" } },
+    ],
+  },
+  {
+    says: "A large write-off waits for Finance, and Erin approves it",
+    given: open(2500),
+    steps: [
+      { says: "Alice claims the dispute", as: "alice", do: "claim" },
+      { says: "Alice accepts the $2,500 dispute; it waits for a Finance Lead", as: "alice", do: "accept", expect: "waits", then: { status: "needs_response" } },
+      { says: "Erin approves in Approvals and the dispute is accepted", as: "erin", approve: true, then: { status: "accepted" } },
+    ],
+  },
+  {
+    says: "Finance rejects a write-off, so the analyst contests the dispute instead",
+    given: open(2500),
+    steps: [
+      { says: "Alice claims the dispute", as: "alice", do: "claim" },
+      { says: "Alice accepts the dispute; it waits for a Finance Lead", as: "alice", do: "accept", expect: "waits" },
+      { says: "Erin rejects the write-off; the dispute still needs a response", as: "erin", reject: true, then: { status: "needs_response" } },
+      { says: "Alice submits evidence instead", as: "alice", do: "contest", then: { status: "under_review" } },
+    ],
+  },
 ]);

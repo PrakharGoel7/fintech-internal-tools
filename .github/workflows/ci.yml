@@ -13,4 +13,8 @@ jobs:
       - if: github.event_name == 'pull_request'
         run: npm run graph -- --diff origin/${{ github.base_ref }}
       - run: npm run seed && npm run build
-      - run: (npm start -- -p 3000 &) && npm run smoke
+      - run: npx playwright install --with-deps chromium
+      - run: (npm start -- -p 3000 &) && npm run smoke && npm run journeys
+      - if: always()
+        uses: actions/upload-artifact@v4
+        with: { name: journey-videos, path: journey-videos/, if-no-files-found: ignore }
