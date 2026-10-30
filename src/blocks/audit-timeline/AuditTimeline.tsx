@@ -23,7 +23,7 @@ export function AuditTimeline({ config, ctx, title }: BlockProps<z.input<typeof 
               <div className="text-xs text-slate-500">
                 {relative(e.ts)}{e.reason && <> · reason: <b>{e.reason.replace(/_/g, " ")}</b></>}
                 {typeof e.details.note === "string" && e.details.note && <> · “{e.details.note}”</>}
-                {typeof e.details.checker === "string" && <> · maker {String(e.details.maker)} → checker {e.details.checker}</>}
+                {typeof e.details.checker === "string" && <> · approved by {e.details.checker}</>}
               </div>
             </div>
           </li>

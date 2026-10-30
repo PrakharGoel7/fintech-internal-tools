@@ -43,8 +43,8 @@ export function RequestForm() {
       <label className="block text-sm font-medium text-slate-700">Urgency
         <select className={cls} value={v.urgency} onChange={(e) => setV({ ...v, urgency: e.target.value })}>{["this week", "this month", "this quarter"].map((o) => <option key={o}>{o}</option>)}</select>
       </label>
-      <button className="btn btn-primary px-4 py-2 text-sm">Submit to Devin</button>
-      {prompt && <div><div className="mt-3 text-xs font-semibold text-slate-600">Prompt sent to Devin</div><pre className="mt-1 whitespace-pre-wrap rounded-lg bg-slate-900 p-3 text-xs text-slate-100">{prompt}</pre></div>}
+      <button className="btn btn-primary px-4 py-2 text-sm">Submit request</button>
+      {prompt && <details className="text-xs"><summary className="mt-2 cursor-pointer font-medium text-slate-500">Prompt sent to Devin</summary><pre className="mt-1 whitespace-pre-wrap rounded-lg bg-slate-900 p-3 text-xs text-slate-100">{prompt}</pre></details>}
     </form>
   );
 }

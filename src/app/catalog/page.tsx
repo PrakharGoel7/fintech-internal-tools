@@ -13,7 +13,7 @@ export default function Catalog() {
     <div className="space-y-8">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Module catalog</h1>
-        <p className="mt-1 text-sm text-slate-500">What Devin reads (as <code>catalog.json</code>) before composing an app. Every block has a typed config schema, use-when / not-for guidance, and declared guarantees.</p>
+        <p className="mt-1 text-sm text-slate-500">Building blocks Devin composes apps from.</p>
       </div>
 
       <section>

@@ -9,14 +9,14 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Audit log</h1>
-          <p className="mt-1 text-sm text-slate-500">Append-only and SHA-256 hash-chained across every app. PII values are never written here.</p>
+          <p className="mt-1 text-sm text-slate-500">Every action across all apps. Tamper-evident; PII is never stored here.</p>
         </div>
         <VerifyChain />
       </div>
       <form className="flex flex-wrap gap-2 text-sm">
-        <input name="app" defaultValue={sp.app} placeholder="app slug" className="input" />
-        <input name="actor" defaultValue={sp.actor} placeholder="actor id" className="input" />
-        <input name="action" defaultValue={sp.action} placeholder="action prefix (e.g. pii.)" className="input" />
+        <input name="app" defaultValue={sp.app} placeholder="App" className="input" />
+        <input name="actor" defaultValue={sp.actor} placeholder="User" className="input" />
+        <input name="action" defaultValue={sp.action} placeholder="Action, e.g. pii." className="input" />
         <button className="btn btn-sm btn-dark">Filter</button>
       </form>
       <div className="card overflow-x-auto">
