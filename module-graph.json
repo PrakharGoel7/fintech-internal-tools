@@ -259,6 +259,20 @@
       "sources": [
         "feature_flags"
       ]
+    },
+    "chargeback-disputes": {
+      "blocks": {
+        "audit-timeline": "1.0.0",
+        "chart": "1.0.1",
+        "comments": "1.0.0",
+        "data-grid": "1.0.1",
+        "metric-cards": "1.0.1",
+        "record-detail": "1.0.1",
+        "review-queue": "2.0.1"
+      },
+      "sources": [
+        "disputes"
+      ]
     }
   }
 }
