@@ -58,7 +58,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "vendor-invoices"
+        "vendor-invoices",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -269,7 +270,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "vendor-invoices"
+        "vendor-invoices",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -425,7 +427,8 @@
       },
       "usedBy": [
         "kyc-review",
-        "vendor-invoices"
+        "vendor-invoices",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -759,7 +762,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "vendor-invoices"
+        "vendor-invoices",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -914,7 +918,8 @@
         "currency": true
       },
       "usedBy": [
-        "refunds"
+        "refunds",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -1258,7 +1263,8 @@
         "kyc-review",
         "refunds",
         "feature-flags",
-        "vendor-invoices"
+        "vendor-invoices",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -1317,7 +1323,8 @@
       "usedBy": [
         "kyc-review",
         "refunds",
-        "vendor-invoices"
+        "vendor-invoices",
+        "chargeback-disputes"
       ],
       "configSchema": {
         "type": "object",
@@ -1470,6 +1477,83 @@
         }
       },
       {
+        "name": "disputes",
+        "pk": "id",
+        "piiFields": [
+          "customer_name",
+          "customer_email"
+        ],
+        "fields": {
+          "id": {
+            "label": "Dispute",
+            "type": "text"
+          },
+          "charge_id": {
+            "label": "Charge",
+            "type": "text"
+          },
+          "customer_name": {
+            "label": "Customer",
+            "type": "text"
+          },
+          "customer_email": {
+            "label": "Customer email",
+            "type": "text"
+          },
+          "amount": {
+            "label": "Amount",
+            "type": "currency"
+          },
+          "currency": {
+            "label": "Currency",
+            "type": "text"
+          },
+          "card_network": {
+            "label": "Network",
+            "type": "text"
+          },
+          "reason": {
+            "label": "Reason",
+            "type": "text"
+          },
+          "evidence_due_by": {
+            "label": "Evidence due",
+            "type": "date"
+          },
+          "status": {
+            "label": "Status",
+            "type": "status",
+            "tones": {
+              "needs_response": "warn",
+              "under_review": "info",
+              "won": "good",
+              "lost": "bad",
+              "accepted": "neutral"
+            }
+          },
+          "assignee": {
+            "label": "Assignee",
+            "type": "text"
+          },
+          "evidence_submission_id": {
+            "label": "Evidence submission",
+            "type": "text"
+          },
+          "win_pct": {
+            "label": "Win %",
+            "type": "number"
+          },
+          "created_at": {
+            "label": "Opened",
+            "type": "date"
+          },
+          "updated_at": {
+            "label": "Updated",
+            "type": "date"
+          }
+        }
+      },
+      {
         "name": "feature_flags",
         "pk": "id",
         "piiFields": [],
@@ -1578,7 +1662,9 @@
     ],
     "external": {
       "stripe": [
-        "refund"
+        "refund",
+        "submitDisputeEvidence",
+        "acceptDispute"
       ],
       "kycVendor": [
         "rescreen"
@@ -1686,6 +1772,33 @@
         "audit-timeline",
         "comments",
         "form"
+      ]
+    },
+    {
+      "slug": "chargeback-disputes",
+      "name": "Chargeback Dispute Queue",
+      "permissions": [
+        "view",
+        "work",
+        "pii.reveal",
+        "comment",
+        "export"
+      ],
+      "actions": [
+        "claim",
+        "contest",
+        "accept",
+        "recordWon",
+        "recordLost"
+      ],
+      "blocks": [
+        "metric-cards",
+        "review-queue",
+        "chart",
+        "data-grid",
+        "record-detail",
+        "audit-timeline",
+        "comments"
       ]
     }
   ]

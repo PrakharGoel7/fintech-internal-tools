@@ -13,3 +13,5 @@ Rule: 1st app → app-local handler. 2nd app, or compliance-critical → shared 
 | Block an action when the actor is the record's creator (segregation of duties: entering clerk can't approve) | vendor-invoices (1) | platform action option `notBy: ["entered_by"]`, checked against whoever executes the action (the checker when approval applies) | resolved (shared; compliance-critical) |
 | Date input on `form` (date picker / validation) | vendor-invoices (1) | text field with `YYYY-MM-DD` placeholder | open |
 | Validation on create actions (unique vendor + invoice number, amount > 0) | vendor-invoices (1) | not built — create effects have no validation hook | open |
+| Ratio metrics (win rate = won / (won + lost)) — `chart` / `metric-cards` only aggregate count/sum/avg | chargeback-disputes (1) | derived `win_pct` column (100 = won, 0 = lost, null otherwise), set by the `recordWon` / `recordLost` actions; `chart` uses `agg: avg` | app-local |
+| Time-relative conditions (e.g. "evidence due within 48h") in `metric-cards` / `where` | chargeback-disputes (1) | not built — per-item deadline badges in the queue instead | open |
