@@ -101,6 +101,30 @@ const defs: SourceDef[] = [
       updated_at: { label: "Updated", type: "date" },
     },
   },
+  {
+    name: "vendor_invoices",
+    table: "vendor_invoices",
+    label: "Vendor invoice",
+    pk: "id",
+    titleField: "invoice_number",
+    piiFields: ["bank_account"],
+    searchFields: ["id", "vendor_name", "invoice_number"],
+    defaultSort: { field: "due_date", dir: "asc" },
+    fields: {
+      id: { label: "Invoice", type: "text" },
+      vendor_name: { label: "Vendor", type: "text" },
+      invoice_number: { label: "Invoice #", type: "text" },
+      amount: { label: "Amount", type: "currency" },
+      currency: { label: "Currency", type: "text" },
+      due_date: { label: "Due", type: "date" },
+      bank_account: { label: "Vendor bank account", type: "text" },
+      status: { label: "Status", type: "status", tones: { pending_review: "info", on_hold: "warn", approved: "good", rejected: "bad" } },
+      entered_by: { label: "Entered by", type: "text" },
+      approved_by: { label: "Approved by", type: "text" },
+      created_at: { label: "Entered", type: "date" },
+      updated_at: { label: "Updated", type: "date" },
+    },
+  },
 ];
 
 export const sources: Record<string, TableSource> = Object.fromEntries(defs.map((d) => [d.name, new TableSource(d)]));

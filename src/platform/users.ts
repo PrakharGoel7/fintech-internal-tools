@@ -8,6 +8,7 @@ export const ROLES = [
   "ops-lead",
   "compliance",
   "finance-lead",
+  "ap-clerk",
   "engineer",
   "eng-lead",
 ] as const;
@@ -26,6 +27,8 @@ export const USERS: User[] = [
   { id: "carol", name: "Carol Okafor", title: "Compliance Officer", roles: ["compliance"] },
   { id: "sam", name: "Sam Lee", title: "Support Agent", roles: ["support-agent"] },
   { id: "erin", name: "Erin Patel", title: "Finance Lead", roles: ["finance-lead"] },
+  { id: "maya", name: "Maya Johnson", title: "AP Clerk", roles: ["ap-clerk"] },
+  { id: "leo", name: "Leo Martins", title: "AP Clerk", roles: ["ap-clerk"] },
   { id: "dan", name: "Dan Kim", title: "Software Engineer", roles: ["engineer"] },
   { id: "priya", name: "Priya Shah", title: "Engineering Lead", roles: ["eng-lead"] },
 ];

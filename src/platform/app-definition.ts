@@ -27,6 +27,8 @@ export const actionSchema = z.object({
   /** Required reason codes; the user must pick one (recorded in the audit log). */
   reasonCodes: z.array(z.string()).optional(),
   requireNote: z.boolean().optional(),
+  /** Segregation of duties: the user named in any of these record fields can't carry out the action (checked against whoever executes it, i.e. the checker when approval applies). */
+  notBy: z.array(z.string()).optional(),
   /** The action is only offered/allowed when the record matches. */
   availableWhen: conditionsSchema.optional(),
   /** Maker-checker: if the record matches `when`, a second person must approve. */

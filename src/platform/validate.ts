@@ -26,6 +26,7 @@ export function validateApp(app: AppModule): string[] {
     if (a.effect.kind === "handler" && !app.handlers?.[a.effect.name]) errs.push(`action ${id}: handler "${a.effect.name}" not defined`);
     if (a.approval) for (const r of a.approval.approverRoles) if (!roles.has(r)) errs.push(`action ${id}: unknown approver role "${r}"`);
     const fields = sources[a.source]?.def.fields ?? {};
+    for (const f of a.notBy ?? []) if (sources[a.source] && !fields[f]) errs.push(`action ${id}: notBy references unknown field "${f}"`);
     for (const c of [...(a.availableWhen ?? []), ...(a.approval?.when ?? [])])
       if (sources[a.source] && !fields[c.field]) errs.push(`action ${id}: condition on unknown field "${c.field}"`);
   }
