@@ -56,7 +56,7 @@
       ]
     },
     "review-queue": {
-      "version": "2.0.1",
+      "version": "2.0.2",
       "files": [
         "src/blocks/_shared/ActionButton.tsx",
         "src/blocks/_shared/PiiValue.tsx",
@@ -229,7 +229,7 @@
         "data-grid": "1.0.1",
         "metric-cards": "1.0.1",
         "record-detail": "1.0.1",
-        "review-queue": "2.0.1"
+        "review-queue": "2.0.2"
       },
       "sources": [
         "kyc_cases"

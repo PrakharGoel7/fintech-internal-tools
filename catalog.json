@@ -342,7 +342,7 @@
     },
     {
       "name": "review-queue",
-      "version": "2.0.1",
+      "version": "2.0.2",
       "category": "workflow",
       "summary": "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
       "useWhen": [
