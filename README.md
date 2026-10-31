@@ -5,14 +5,19 @@ A platform for a fintech's internal apps. Each app is mostly a short config file
 The question this prototype tests: **can you keep the speed and consistency of a shared platform without limiting what each app can do?**
 
 ## How an app gets built
+```mermaid
+flowchart LR
+  A["Request form<br/>(ops, finance, compliance)"] --> B["Devin drafts spec,<br/>scenarios + journeys"]
+  B --> G1{{"Engineer<br/>approves spec"}}
+  G1 -- changes requested --> B
+  G1 -- approved --> C["Devin builds<br/>app.ts"]
+  C --> D["CI: checks, scenarios,<br/>video of every journey"]
+  D --> G2{{"Eng Lead watches<br/>videos, pushes to prod"}}
+  G2 --> E["Live in the portal"]
+  classDef gate fill:#fde68a,stroke:#b45309,color:#000
+  class G1,G2 gate
 ```
-Request form (/request)          an ops / finance / compliance user describes the app
-  → Devin drafts SPEC.md + scenarios + journeys   (reads catalog.json + GAPS.md; draft PR)
-  → Engineer approves the spec   (/requests)
-  → Devin builds src/apps/<slug>/app.ts
-  → CI: checks, scenarios, a browser video of every journey
-  → Eng Lead watches the videos and pushes to prod   (/requests → merges the PR)
-```
+Devin does the work between the two highlighted gates; engineers own the gates. Both happen on the `/requests` dashboard; the spec is a draft PR that Devin reads from `catalog.json` and `GAPS.md`.
 Devin's instructions: [`.agents/skills/build-internal-app`](.agents/skills/build-internal-app/SKILL.md). Requesters are never asked questions; Devin records assumptions and the engineer approves them.
 
 ## Four design decisions
@@ -34,12 +39,51 @@ A need no block covers is built app-locally and logged in [`GAPS.md`](GAPS.md). 
 ### 2. Governance lives in one shared layer
 Every mutation goes through one server-side pipeline in [`src/platform/actions.ts`](src/platform/actions.ts):
 `RBAC → reason code → availability guard → idempotency → maker-checker → segregation of duties → execute → audit`.
-Apps can't bypass it (`npm run boundaries` enforces the layering). Reads are permission-checked and PII fields are masked unless a user with the right role reveals them, which is audited. The audit log is hash-chained, so tampering is detectable.
+Apps can't bypass it (`npm run boundaries` enforces the layering).
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 600}}}%%
+flowchart TB
+  subgraph Apps["Apps (config)"]
+    direction LR
+    K[KYC] ~~~ R[Refunds] ~~~ F[Feature Flags] ~~~ C[Chargebacks] ~~~ V[Vendor Invoices]
+  end
+  subgraph Blocks["Blocks"]
+    direction LR
+    q[review-queue] ~~~ g[data-grid] ~~~ fm[form] ~~~ m[metric-cards] ~~~ more["+5 more"]
+  end
+  Gov["<b>Governance layer</b><br/>every read and write: RBAC<br/>reads: PII masked (reveal is audited)<br/>writes: reason codes · maker-checker · segregation of duties · hash-chained audit"]
+  subgraph Conn["Connectors"]
+    direction LR
+    t[(Table sources)] ~~~ s[Stripe mock] ~~~ kv[KYC vendor mock]
+  end
+  Apps --> Blocks --> Gov --> Conn
+  classDef gov fill:#fde68a,stroke:#b45309,color:#000
+  class Gov gov
+```
+ Reads are permission-checked and PII fields are masked unless a user with the right role reveals them, which is audited. The audit log is hash-chained, so tampering is detectable.
 
 *Tradeoff:* an app needing a new kind of access rule waits on a shared-layer change and its tests.
 
 ### 3. Blocks are versioned, with a dependency graph
 Every block has a semver version. [`module-graph.json`](module-graph.json) (`npm run graph`) records which files each block is built from and which block versions each app uses. On every PR, CI fails if a block changed without a version bump, and lists the affected apps; it then retests every app. A fix is made once in a block, not copied between apps.
+
+```mermaid
+flowchart LR
+  RQ["review-queue<br/>2.0.2 → 2.1.0"] --> K[KYC]
+  RQ --> C[Chargebacks]
+  RQ --> V[Vendor Invoices]
+  R[Refunds]
+  F[Feature Flags]
+  classDef changed fill:#fde68a,stroke:#b45309,color:#000
+  classDef affected fill:#fee2e2,stroke:#b91c1c,color:#000
+  classDef untouched fill:#f1f5f9,stroke:#94a3b8,color:#64748b
+  class RQ changed
+  class K,C,V affected
+  class R,F untouched
+```
+*Example: a new option on `review-queue` must bump its version (here a minor bump), and CI flags KYC, Chargebacks and Vendor Invoices as affected; Refunds and Feature Flags don't use it.*
+
 
 *Tradeoff:* a small change to a widely used block needs coordination across every app that uses it.
 
