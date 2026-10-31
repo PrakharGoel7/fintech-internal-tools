@@ -120,4 +120,4 @@ Also: **Audit log** → Verify integrity ✓ → `npm run tamper-demo` → Verif
 `npm start & npm run smoke && npm run journeys` — page loads, then every journey in a real browser with a video each.
 
 ## What's mocked
-Synthetic data only; mock SSO user switcher; Stripe and the KYC vendor are mocked; SQLite. Open gaps (date picker, bulk actions, document viewer, …) are listed in [`GAPS.md`](GAPS.md).
+Synthetic data only; mock SSO user switcher; Stripe and the KYC vendor are mocked; SQLite.
