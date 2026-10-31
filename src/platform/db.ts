@@ -102,9 +102,4 @@ export function getDb(): DatabaseSync {
   return g.__db;
 }
 
-export function resetDbForTests() {
-  g.__db?.close();
-  g.__db = undefined;
-}
-
 export type Row = Record<string, unknown>;

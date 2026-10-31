@@ -8,7 +8,7 @@ import type { AppModule, ActionDef, Effect } from "./app-definition";
 import type { User } from "./users";
 import { getSource, externalConnectors } from "@/connectors";
 
-export class ActionError extends Error {
+class ActionError extends Error {
   constructor(msg: string) { super(msg); this.name = "ActionError"; }
 }
 

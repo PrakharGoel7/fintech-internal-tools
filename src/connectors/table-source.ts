@@ -27,7 +27,7 @@ export interface FieldDef {
 
 const SQL_TYPE: Record<FieldDef["type"], string> = { text: "TEXT", status: "TEXT", date: "TEXT", number: "NUMERIC", currency: "REAL", boolean: "INTEGER" };
 
-export function tableDdl(def: SourceDef): string {
+function tableDdl(def: SourceDef): string {
   const cols = Object.entries(def.fields).map(([k, f]) => `  ${k} ${SQL_TYPE[f.type]}${k === def.pk ? " PRIMARY KEY" : ""}`);
   return `CREATE TABLE IF NOT EXISTS ${def.table} (\n${cols.join(",\n")}\n);`;
 }

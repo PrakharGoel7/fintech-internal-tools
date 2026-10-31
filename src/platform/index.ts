@@ -5,5 +5,4 @@ export * from "./audit";
 export * from "./conditions";
 export * from "./app-definition";
 export * from "./actions";
-export { maskValue } from "./pii";
 export * from "./scenarios";

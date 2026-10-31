@@ -43,7 +43,7 @@ export const actionSchema = z.object({
 });
 export type ActionDef = z.infer<typeof actionSchema>;
 
-export const blockInstanceSchema = z.object({
+const blockInstanceSchema = z.object({
   type: z.string(),
   title: z.string().optional(),
   width: z.enum(["full", "half", "third", "two-thirds"]).default("full"),
