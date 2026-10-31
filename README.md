@@ -17,8 +17,7 @@ flowchart LR
   classDef gate fill:#fde68a,stroke:#b45309,color:#000
   class G1,G2 gate
 ```
-Devin does the work between the two highlighted gates; engineers own the gates. Both happen on the `/requests` dashboard; the spec is a draft PR that Devin reads from `catalog.json` and `GAPS.md`.
-Devin's instructions: [`.agents/skills/build-internal-app`](.agents/skills/build-internal-app/SKILL.md). Requesters are never asked questions; Devin records assumptions and the engineer approves them.
+Devin checks the block catalog for anything it can reuse, then drafts the spec. Requesters are never asked questions: Devin writes down its assumptions, and the engineer approves them at the first gate (see [decision 4](#4-engineers-stay-in-the-loop)).
 
 ## Four design decisions
 
@@ -118,7 +117,7 @@ What the new apps did need is in [`GAPS.md`](GAPS.md): one block option (`review
 | Apps | `src/apps/<slug>/` | `app.ts`, `scenarios.ts` (scenarios + journeys), `SPEC.md` |
 | Portal | `src/app/` | gallery, app renderer, approvals, audit, module catalog, request form, requests dashboard |
 
-Imports only flow downward. Rules for Devin and humans: [`AGENTS.md`](AGENTS.md).
+Imports only flow downward. Rules for Devin and humans: [`AGENTS.md`](AGENTS.md). Devin's steps for building an app: [`build-internal-app`](.agents/skills/build-internal-app/SKILL.md).
 
 ## Run it
 ```bash
