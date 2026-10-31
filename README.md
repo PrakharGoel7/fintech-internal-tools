@@ -81,7 +81,6 @@ flowchart LR
   class K,C,V affected
   class R,F untouched
 ```
-*Example: a new option on `review-queue` must bump its version (here a minor bump), and CI flags KYC, Chargebacks and Vendor Invoices as affected; Refunds and Feature Flags don't use it.*
 
 
 *Tradeoff:* a small change to a widely used block needs coordination across every app that uses it.
