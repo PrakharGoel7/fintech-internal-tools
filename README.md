@@ -1,50 +1,123 @@
 # Internal Tools on Devin — a Power Apps alternative (prototype)
 
-Apps are **typed config files composed from reusable, governed blocks**. Devin builds new apps from plain-language requests using the skills in `.agents/skills/`, and the platform layer enforces fintech guardrails no matter what the app config says.
+A platform for a fintech's internal apps. Each app is mostly a short config file that combines reusable, versioned blocks; every app shares one governance layer for permissions, approvals, PII masking and audit. Devin builds new apps from plain-language requests, and engineers approve the spec and the finished app.
 
+The question this prototype tests: **can you keep the speed and consistency of a shared platform without limiting what each app can do?**
+
+## How an app gets built
+```mermaid
+flowchart LR
+  A["Request form<br/>(ops, finance, compliance)"] --> B["Devin drafts spec,<br/>scenarios + journeys"]
+  B --> G1{{"Engineer<br/>approves spec"}}
+  G1 -- changes requested --> B
+  G1 -- approved --> C["Devin builds<br/>app.ts"]
+  C --> D["CI: checks, scenarios,<br/>video of every journey"]
+  D --> G2{{"Eng Lead watches<br/>videos, pushes to prod"}}
+  G2 --> E["Live in the portal"]
+  classDef gate fill:#fde68a,stroke:#b45309,color:#000
+  class G1,G2 gate
 ```
-request (ops / compliance / eng) ──► Devin: build-internal-app skill
-        │                              ├─ reads catalog.json + GAPS.md
-        │                              ├─ spec + coverage table (covered / extend / app-local / new block)
-        │                              └─ src/apps/<slug>/app.ts  ──► PR (CI: validate, boundaries, tests)
-        ▼
- Portal ── app renderer ── blocks (L3) ── connectors (L2) ── platform (L0: RBAC, audit, PII, maker-checker)
+Devin checks the block catalog for anything it can reuse, then drafts the spec. Requesters are never asked questions: Devin writes down its assumptions, and the engineer approves them at the first gate (see [decision 4](#4-engineers-stay-in-the-loop)).
+
+## Four design decisions
+
+### 1. Apps are configuration
+An app is one `defineApp({...})` call: permissions, actions and pages made of blocks. See [`src/apps/vendor-invoices/app.ts`](src/apps/vendor-invoices/app.ts) (133 lines, no app-specific code). Devin always takes the lowest rung of the **customization ladder** that works, and justifies rung 4+ in the PR:
+
+1. Configure an existing block
+2. Compose blocks on a page
+3. App-local handler (logic only this app needs)
+4. New connector / data source
+5. Extend a block with a new optional, backwards-compatible option
+6. New block (via the [`create-block`](.agents/skills/create-block/SKILL.md) skill)
+
+A need no block covers is built app-locally and logged in [`GAPS.md`](GAPS.md). When a **second** app needs it, or it is compliance-critical, it becomes shared.
+
+### 2. Governance lives in one shared layer
+Every mutation goes through one server-side pipeline in [`src/platform/actions.ts`](src/platform/actions.ts):
+`RBAC → reason code → availability guard → idempotency → maker-checker → segregation of duties → execute → audit`.
+Apps can't bypass it (`npm run boundaries` enforces the layering).
+
+```mermaid
+%%{init: {"flowchart": {"wrappingWidth": 600}}}%%
+flowchart TB
+  subgraph Apps["Apps (config)"]
+    direction LR
+    K[KYC] ~~~ R[Refunds] ~~~ F[Feature Flags] ~~~ C[Chargebacks] ~~~ V[Vendor Invoices]
+  end
+  subgraph Blocks["Blocks"]
+    direction LR
+    q[review-queue] ~~~ g[data-grid] ~~~ fm[form] ~~~ m[metric-cards] ~~~ more["+5 more"]
+  end
+  Gov["<b>Governance layer</b><br/>every read and write: RBAC<br/>reads: PII masked (reveal is audited)<br/>writes: reason codes · maker-checker · segregation of duties · hash-chained audit"]
+  subgraph Conn["Connectors"]
+    direction LR
+    t[(Table sources)] ~~~ s[Stripe mock] ~~~ kv[KYC vendor mock]
+  end
+  Apps --> Blocks --> Gov --> Conn
+  classDef gov fill:#fde68a,stroke:#b45309,color:#000
+  class Gov gov
+```
+ Reads are permission-checked and PII fields are masked unless a user with the right role reveals them, which is audited. The audit log is hash-chained, so tampering is detectable.
+
+### 3. Blocks are versioned, with a dependency graph
+Every block has a version, and [`module-graph.json`](module-graph.json) records which apps use which block versions. CI fails any PR that changes a block without bumping its version, and lists the affected apps. A fix is made once in the block, not copied between apps.
+
+```mermaid
+flowchart LR
+  RQ["review-queue<br/>2.0.2 → 2.1.0"] --> K[KYC]
+  RQ --> C[Chargebacks]
+  RQ --> V[Vendor Invoices]
+  R[Refunds]
+  F[Feature Flags]
+  classDef changed fill:#fde68a,stroke:#b45309,color:#000
+  classDef affected fill:#fee2e2,stroke:#b91c1c,color:#000
+  classDef untouched fill:#f1f5f9,stroke:#94a3b8,color:#64748b
+  class RQ changed
+  class K,C,V affected
+  class R,F untouched
 ```
 
-## What's in the prototype
-| Power Apps concept | Here |
-|---|---|
-| Canvas/model-driven app | `src/apps/<slug>/app.ts` — one `defineApp({...})` |
-| Controls / components | 9 blocks in `src/blocks/` (data-grid, record-detail, review-queue, metric-cards, chart, toggle-matrix, form, audit-timeline, comments) each with a zod schema + manifest |
-| Connectors | `src/connectors/` — table sources with PII tags; mocked Stripe & KYC vendor |
-| Power Automate approvals | Declarative `approval` rules on actions → shared Approvals inbox (maker ≠ checker) |
-| Environments / DLP / audit | Server-side RBAC, masked PII with audited reveal, hash-chained audit log, reason codes, idempotency |
-| Maker experience | Devin + `build-internal-app` skill + `catalog.json`; ops/compliance use the **Request an app** page |
-| Testing | Plain-language scenarios and browser journeys per app (`src/apps/<slug>/scenarios.ts`); CI records a video of every journey |
-| Release | **Requests** dashboard: an engineer approves Devin's spec, reviews CI and journey videos, and an Eng Lead pushes to prod |
-| Versioning | Semver per block; `module-graph.json` maps apps to block versions and CI flags affected apps |
+### 4. Engineers stay in the loop
+Engineers sign off twice, both on the `/requests` dashboard:
 
-Apps: **KYC Review Queue**, **Refunds Dashboard**, **Feature Flag Admin**, **Chargeback Dispute Queue**, **Vendor Invoice Approvals** — all config; the only app-local code is one KYC handler (`escalateToCompliance`).
+1. **Before the build: approve the spec.** An engineer reads Devin's spec (assumptions, roles, pages, test journeys) and approves it or sends it back.
+2. **Before production: approve the finished app.** CI runs the checks and records a video of every journey. An Eng Lead watches them and clicks Push to prod.
 
-## Run
+Devin never ships anything on its own.
+
+## Repo map
+| Layer | Path | What lives here |
+|---|---|---|
+| Platform | `src/platform/` | users/roles, RBAC, action pipeline, approvals, audit, PII, app schema, requests + GitHub |
+| Connectors | `src/connectors/` | typed data sources with PII tags; mocked Stripe and KYC vendor |
+| Blocks | `src/blocks/<name>/` | React component + `manifest.ts` (zod schema, version, use-when / not-for) |
+| Apps | `src/apps/<slug>/` | `app.ts`, `scenarios.ts` (scenarios + journeys), `SPEC.md` |
+| Portal | `src/app/` | gallery, app renderer, approvals, audit, module catalog, request form, requests dashboard |
+
+Imports only flow downward. Rules for Devin and humans: [`AGENTS.md`](AGENTS.md). Devin's steps for building an app: [`build-internal-app`](.agents/skills/build-internal-app/SKILL.md).
+
+## Run it
 ```bash
 source ~/.nvm/nvm.sh   # Node >= 22.5 (uses node:sqlite)
 npm install
 npm run seed           # synthetic data only
 npm run dev            # http://localhost:3000 — switch users via the MOCK SSO dropdown
 ```
-Optional: set `GITHUB_TOKEN` + `GITHUB_REPO` (files an issue per request) and/or `DEVIN_API_KEY` + `DEVIN_ORG_ID` (starts a Devin session per request via the v3 API; create the key under Settings > Devin API — a service user with `UseDevinSessions`, or a PAT). Without `DEVIN_ORG_ID` the legacy v1 endpoint is used.
+Optional: set `GITHUB_TOKEN` + `GITHUB_REPO` (files an issue per request and powers the Requests dashboard) and/or `DEVIN_API_KEY` + `DEVIN_ORG_ID` (starts a Devin session per request via the v3 API; create the key under Settings > Devin API — a service user with `UseDevinSessions`, or a PAT). Without `DEVIN_ORG_ID` the legacy v1 endpoint is used.
 
-## Demo script
-1. **Alice (KYC analyst)** → KYC queue → claim a high-risk case → Approve → goes to Approvals (needs Compliance).
-2. **Carol (Compliance)** → Approvals → approve; reveal SSN on the case (audited).
-3. **Bob (Ops lead)** → Refunds → issue a $120 refund (instant, mock Stripe) and a $2,000 one (needs Finance) → **Erin** approves.
-4. **Dan (Engineer)** → enable a flag in prod → pending → **Priya** approves. Turning it off (kill switch) is instant.
-5. **Audit log** → Verify integrity ✓ → `npm run tamper-demo` → Verify again ✗.
-6. **Module catalog** → blocks with versions and "Used by", connectors, gap ledger.
-7. **Request an app** → submit as an ops user → prompt handed to Devin.
-8. **Requests** (as Dan / Priya) → review the spec, approve, watch journey videos, push to prod.
+## Walkthrough
+1. **Module catalog** → each block's version and "Used by"; open Vendor Invoices and Chargebacks: same `review-queue`, different config.
+2. **Request an app** (as Erin) → fill in the form, tick sensitive data → Devin session starts.
+3. **Refunds** (as Bob) → email masked → issue a refund over $500 with a reason → **Approvals**: Bob can't approve his own → switch to **Erin**, approve → the record's history shows both.
+4. **Requests** (as Dan) → review a spec → Approve spec & build.
+5. **Requests** (as Priya) → Ready to ship: CI green, journey videos → Push to prod.
+
+Also: **Audit log** → Verify integrity ✓ → `npm run tamper-demo` → Verify again ✗.
 
 ## Checks
 `npm run check` — typecheck, lint, layer boundaries, app config validation, `catalog.json` and `module-graph.json` freshness, unit tests (RBAC, maker-checker, idempotency, PII, audit tamper detection) and every app's scenarios.
 `npm start & npm run smoke && npm run journeys` — page loads, then every journey in a real browser with a video each.
+
+## What's mocked
+Synthetic data only; mock SSO user switcher; Stripe and the KYC vendor are mocked; SQLite.
