@@ -65,7 +65,7 @@ flowchart TB
 *Tradeoff:* an app needing a new kind of access rule waits on a shared-layer change and its tests.
 
 ### 3. Blocks are versioned, with a dependency graph
-Every block has a semver version. [`module-graph.json`](module-graph.json) (`npm run graph`) records which files each block is built from and which block versions each app uses. On every PR, CI fails if a block changed without a version bump, and lists the affected apps; it then retests every app. A fix is made once in a block, not copied between apps.
+Every block has a version, and [`module-graph.json`](module-graph.json) records which apps use which block versions. CI fails any PR that changes a block without bumping its version, and lists the affected apps. A fix is made once in the block, not copied between apps.
 
 ```mermaid
 flowchart LR
