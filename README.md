@@ -33,8 +33,6 @@ An app is one `defineApp({...})` call: permissions, actions and pages made of bl
 
 A need no block covers is built app-locally and logged in [`GAPS.md`](GAPS.md). When a **second** app needs it, or it is compliance-critical, it becomes shared.
 
-*Tradeoff:* forcing an unusual workflow into existing blocks can give a worse design than custom code; rung 3 exists for that.
-
 ### 2. Governance lives in one shared layer
 Every mutation goes through one server-side pipeline in [`src/platform/actions.ts`](src/platform/actions.ts):
 `RBAC → reason code → availability guard → idempotency → maker-checker → segregation of duties → execute → audit`.
@@ -62,8 +60,6 @@ flowchart TB
 ```
  Reads are permission-checked and PII fields are masked unless a user with the right role reveals them, which is audited. The audit log is hash-chained, so tampering is detectable.
 
-*Tradeoff:* an app needing a new kind of access rule waits on a shared-layer change and its tests.
-
 ### 3. Blocks are versioned, with a dependency graph
 Every block has a version, and [`module-graph.json`](module-graph.json) records which apps use which block versions. CI fails any PR that changes a block without bumping its version, and lists the affected apps. A fix is made once in the block, not copied between apps.
 
@@ -82,13 +78,8 @@ flowchart LR
   class R,F untouched
 ```
 
-
-*Tradeoff:* a small change to a widely used block needs coordination across every app that uses it.
-
 ### 4. Engineers stay in the loop
 The `/requests` dashboard is the engineer's view: the spec (assumptions, roles, pages, journeys) to approve or send back before the build, then CI status and a video of every journey before an Eng Lead pushes to prod. Devin never merges.
-
-*Tradeoff:* review takes engineering time; reusing pre-tested blocks and watching journey videos keeps it short.
 
 ## Does reuse hold up?
 Five apps, nine blocks. Chargebacks and Vendor Invoices were built from requests with **no new blocks**; each needed only a new data source.
