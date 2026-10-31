@@ -86,23 +86,6 @@ Engineers sign off twice, both on the `/requests` dashboard:
 
 Devin never ships anything on its own.
 
-## Does reuse hold up?
-Five apps, nine blocks. Chargebacks and Vendor Invoices were built from requests with **no new blocks**; each needed only a new data source.
-
-| Block | KYC | Refunds | Feature Flags | Chargebacks | Vendor Invoices |
-|---|---|---|---|---|---|
-| `audit-timeline` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `record-detail` | ✓ | ✓ | ✓ | ✓ | ✓ |
-| `data-grid` | ✓ | ✓ | | ✓ | ✓ |
-| `metric-cards` | ✓ | ✓ | | ✓ | ✓ |
-| `comments` | ✓ | ✓ | | ✓ | ✓ |
-| `review-queue` | ✓ | | | ✓ | ✓ |
-| `form` | | ✓ | ✓ | | ✓ |
-| `chart` | | ✓ | | ✓ | |
-| `toggle-matrix` | | | ✓ | | |
-
-What the new apps did need is in [`GAPS.md`](GAPS.md): one block option (`review-queue` deadline countdowns) and one shared platform rule (segregation of duties, `notBy`). The only app-local code across all five apps is one KYC handler.
-
 ## Repo map
 | Layer | Path | What lives here |
 |---|---|---|
