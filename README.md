@@ -79,7 +79,12 @@ flowchart LR
 ```
 
 ### 4. Engineers stay in the loop
-The `/requests` dashboard is the engineer's view: the spec (assumptions, roles, pages, journeys) to approve or send back before the build, then CI status and a video of every journey before an Eng Lead pushes to prod. Devin never merges.
+Engineers sign off twice, both on the `/requests` dashboard:
+
+1. **Before the build: approve the spec.** An engineer reads Devin's spec (assumptions, roles, pages, test journeys) and approves it or sends it back.
+2. **Before production: approve the finished app.** CI runs the checks and records a video of every journey. An Eng Lead watches them and clicks Push to prod.
+
+Devin never ships anything on its own.
 
 ## Does reuse hold up?
 Five apps, nine blocks. Chargebacks and Vendor Invoices were built from requests with **no new blocks**; each needed only a new data source.
