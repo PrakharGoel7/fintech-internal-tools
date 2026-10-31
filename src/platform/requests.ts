@@ -3,7 +3,7 @@ import { getDb, type Row } from "./db";
 import { audit } from "./audit";
 import { ForbiddenError } from "./rbac";
 import type { Role, User } from "./users";
-import { checksFor, commentOnPull, findRequestPull, githubConfigured, mergePull, type Checks, type Pull } from "./github";
+import { checksFor, commentOnPull, findRequestPull, githubConfigured, githubRepo, mergePull, type Checks, type Pull } from "./github";
 
 /** Who reviews app requests in the portal's Requests dashboard, and who may push a built app to production. */
 export const REQUEST_REVIEW_ROLES: Role[] = ["engineer", "eng-lead"];
@@ -45,7 +45,7 @@ Start with Phase 1. The requester is not technical: do not ask them questions; r
 
 export async function submitAppRequest(user: User, req: AppRequestInput) {
   if (!req.title?.trim() || !req.problem?.trim()) throw new Error("Title and problem are required");
-  const repo = process.env.GITHUB_REPO ?? "PrakharGoel7/fintech-internal-tools";
+  const repo = githubRepo();
   const ref = `req-${randomBytes(4).toString("hex")}`;
   const prompt = buildDevinPrompt(req, user, repo, ref);
   const db = getDb();

@@ -5,7 +5,7 @@ import type { JourneyStep } from "./scenarios";
 type Values = Record<string, unknown>;
 
 /** `"$now-2h"` / `"$now+3d"` → timestamps; `"$unique"` inside a string → a per-run token (for keys that must be unique). */
-export function resolveValue(v: unknown): unknown {
+function resolveValue(v: unknown): unknown {
   if (typeof v !== "string") return v;
   const m = v.match(/^\$now(?:([+-]\d+)([hd]))?$/);
   if (m) return new Date(Date.now() + (m[1] ? Number(m[1]) * (m[2] === "d" ? 86400000 : 3600000) : 0)).toISOString();
