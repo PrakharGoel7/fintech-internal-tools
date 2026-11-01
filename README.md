@@ -22,7 +22,7 @@ Devin checks the block catalog for anything it can reuse, then drafts the spec. 
 ## Four design decisions
 
 ### 1. Apps are configuration
-An app is one `defineApp({...})` call: permissions, actions and pages made of blocks. See [`src/apps/vendor-invoices/app.ts`](src/apps/vendor-invoices/app.ts) (133 lines, no app-specific code). Devin always takes the lowest rung of the **customization ladder** that works, and justifies rung 4+ in the PR:
+An app is one `defineApp({...})` call: permissions, actions and pages made of blocks. Devin always takes the lowest rung of the **customization ladder** that works.
 
 1. Configure an existing block
 2. Compose blocks on a page
