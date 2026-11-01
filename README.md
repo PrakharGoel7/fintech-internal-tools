@@ -106,15 +106,6 @@ npm run dev            # http://localhost:3000 — switch users via the MOCK SSO
 ```
 Optional: set `GITHUB_TOKEN` + `GITHUB_REPO` (files an issue per request and powers the Requests dashboard) and/or `DEVIN_API_KEY` + `DEVIN_ORG_ID` (starts a Devin session per request via the v3 API; create the key under Settings > Devin API — a service user with `UseDevinSessions`, or a PAT). Without `DEVIN_ORG_ID` the legacy v1 endpoint is used.
 
-## Walkthrough
-1. **Module catalog** → each block's version and "Used by"; open Vendor Invoices and Chargebacks: same `review-queue`, different config.
-2. **Request an app** (as Erin) → fill in the form, tick sensitive data → Devin session starts.
-3. **Refunds** (as Bob) → email masked → issue a refund over $500 with a reason → **Approvals**: Bob can't approve his own → switch to **Erin**, approve → the record's history shows both.
-4. **Requests** (as Dan) → review a spec → Approve spec & build.
-5. **Requests** (as Priya) → Ready to ship: CI green, journey videos → Push to prod.
-
-Also: **Audit log** → Verify integrity ✓ → `npm run tamper-demo` → Verify again ✗.
-
 ## Checks
 `npm run check` — typecheck, lint, layer boundaries, app config validation, `catalog.json` and `module-graph.json` freshness, unit tests (RBAC, maker-checker, idempotency, PII, audit tamper detection) and every app's scenarios.
 `npm start & npm run smoke && npm run journeys` — page loads, then every journey in a real browser with a video each.
