@@ -58,7 +58,7 @@ flowchart TB
   classDef gov fill:#fde68a,stroke:#b45309,color:#000
   class Gov gov
 ```
- Reads are permission-checked and PII fields are masked unless a user with the right role reveals them, which is audited. The audit log is hash-chained, so tampering is detectable.
+Reads are permission-checked and PII fields are masked unless a user with the right role reveals them, which is audited. The audit log is hash-chained, so tampering is detectable.
 
 ### 3. Blocks are versioned, with a dependency graph
 Every block has a version, and [`module-graph.json`](module-graph.json) records which apps use which block versions. CI fails any PR that changes a block without bumping its version, and lists the affected apps. A fix is made once in the block, not copied between apps.
