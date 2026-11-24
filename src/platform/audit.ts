@@ -37,29 +37,37 @@ function computeHash(prev: string, e: Omit<AuditEntry, "id" | "hash" | "prev_has
 /** Append-only, hash-chained audit log. There is intentionally no update/delete API. */
 export function audit(event: AuditEvent): AuditEntry {
   const db = getDb();
-  const last = db.prepare("SELECT hash FROM audit_log ORDER BY id DESC LIMIT 1").get() as
-    | { hash: string }
-    | undefined;
-  const prev = last?.hash ?? GENESIS;
-  const entry = {
-    ts: new Date().toISOString(),
-    actor: event.actor,
-    app: event.app ?? null,
-    action: event.action,
-    source: event.source ?? null,
-    record_id: event.recordId ?? null,
-    reason: event.reason ?? null,
-    details: event.details ?? {},
-  };
-  const hash = computeHash(prev, entry);
-  const res = db
-    .prepare(
-      `INSERT INTO audit_log (ts, actor, app, action, source, record_id, reason, details, prev_hash, hash)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    )
-    .run(entry.ts, entry.actor, entry.app, entry.action, entry.source, entry.record_id,
-      entry.reason, JSON.stringify(entry.details), prev, hash);
-  return { id: Number(res.lastInsertRowid), ...entry, prev_hash: prev, hash };
+  // Read the chain head and append under one write lock, so concurrent processes (portal, scheduled sync) can't fork the chain.
+  db.exec("BEGIN IMMEDIATE");
+  try {
+    const last = db.prepare("SELECT hash FROM audit_log ORDER BY id DESC LIMIT 1").get() as
+      | { hash: string }
+      | undefined;
+    const prev = last?.hash ?? GENESIS;
+    const entry = {
+      ts: new Date().toISOString(),
+      actor: event.actor,
+      app: event.app ?? null,
+      action: event.action,
+      source: event.source ?? null,
+      record_id: event.recordId ?? null,
+      reason: event.reason ?? null,
+      details: event.details ?? {},
+    };
+    const hash = computeHash(prev, entry);
+    const res = db
+      .prepare(
+        `INSERT INTO audit_log (ts, actor, app, action, source, record_id, reason, details, prev_hash, hash)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      )
+      .run(entry.ts, entry.actor, entry.app, entry.action, entry.source, entry.record_id,
+        entry.reason, JSON.stringify(entry.details), prev, hash);
+    db.exec("COMMIT");
+    return { id: Number(res.lastInsertRowid), ...entry, prev_hash: prev, hash };
+  } catch (e) {
+    db.exec("ROLLBACK");
+    throw e;
+  }
 }
 
 function parse(r: Row): AuditEntry {
