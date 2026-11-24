@@ -17,6 +17,8 @@ beforeAll(() => {
   ins.run("dp_big", "ch_b", "Big Spender", "big.spender@example.com", 2400, "USD", "amex", "duplicate", due(72), "needs_response", null, null, null, now, now);
   ins.run("dp_late", "ch_c", "Late Person", "late@example.com", 90, "USD", "visa", "unrecognized", due(-1), "needs_response", null, null, null, now, now);
   ins.run("dp_review", "ch_d", "Review Person", "review@example.com", 400, "USD", "visa", "fraudulent", due(-24), "under_review", "alice", "evs_test", null, now, now);
+  ins.run("dp_idem_a", "ch_f", "Idem A", "a@example.com", 50, "USD", "visa", "duplicate", due(48), "needs_response", null, null, null, now, now);
+  ins.run("dp_idem_b", "ch_g", "Idem B", "b@example.com", 50, "USD", "visa", "duplicate", due(48), "needs_response", null, null, null, now, now);
   ins.run("dp_noevidence", "ch_e", "No Evidence", "none@example.com", 120, "USD", "visa", "duplicate", due(-24), "under_review", "alice", null, null, now, now);
 });
 
@@ -71,6 +73,9 @@ describe("chargeback-disputes", () => {
 
     it("records Stripe's ruling on contested disputes as the Stripe service account", async () => {
       expect(disputes.getRaw("dp_review")!.status).toBe("under_review");
+      // A user's unrelated action can't reserve the sync's idempotency keys.
+      await runAction({ user: alice, app, actionId: "claim", recordId: "dp_idem_a", idempotencyKey: "sync:chargeback-disputes:stripeOutcomes:dp_review:won" });
+      await runAction({ user: alice, app, actionId: "claim", recordId: "dp_idem_b", idempotencyKey: "sync:chargeback-disputes:stripeOutcomes:dp_review:lost" });
       const r = await runSync({ app, syncId: "stripeOutcomes", user: alice });
       expect(r.applied.map((a) => a.recordId)).toContain("dp_review");
       const rec = disputes.getRaw("dp_review")!;

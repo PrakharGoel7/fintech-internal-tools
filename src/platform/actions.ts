@@ -107,8 +107,10 @@ async function execute(req: RunActionInput, action: ActionDef): Promise<ActionRe
   if (action.requireNote && !req.note?.trim()) throw new ActionError("A note is required");
 
   const db = getDb();
-  if (req.idempotencyKey) {
-    const prior = db.prepare("SELECT result FROM idempotency WHERE key = ?").get(req.idempotencyKey) as { result: string } | undefined;
+  // Scoped so one caller's key can't pre-empt another caller's (e.g. a user reserving a sync's key).
+  const idemKey = req.idempotencyKey && `${user.id}:${app.slug}:${actionId}:${req.idempotencyKey}`;
+  if (idemKey) {
+    const prior = db.prepare("SELECT result FROM idempotency WHERE key = ?").get(idemKey) as { result: string } | undefined;
     if (prior) return JSON.parse(prior.result);
   }
 
@@ -145,8 +147,8 @@ async function execute(req: RunActionInput, action: ActionDef): Promise<ActionRe
     });
     result = { status: "executed", recordId: out.recordId };
   }
-  if (req.idempotencyKey) {
-    db.prepare("INSERT INTO idempotency (key, ts, result) VALUES (?, ?, ?)").run(req.idempotencyKey, new Date().toISOString(), JSON.stringify(result));
+  if (idemKey) {
+    db.prepare("INSERT INTO idempotency (key, ts, result) VALUES (?, ?, ?)").run(idemKey, new Date().toISOString(), JSON.stringify(result));
   }
   return result;
 }
