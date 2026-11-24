@@ -3,7 +3,7 @@ import fs from "node:fs";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { manifests } from "@/blocks/manifests";
 import { sources } from "@/connectors";
-import { externalConnectors } from "@/connectors/external";
+import { externalConnectors, externalSyncs } from "@/connectors/external";
 import { apps } from "@/apps/registry";
 
 const catalog = {
@@ -16,8 +16,9 @@ const catalog = {
   connectors: {
     tables: Object.values(sources).map((s) => ({ name: s.def.name, pk: s.def.pk, piiFields: s.def.piiFields, fields: s.def.fields })),
     external: Object.fromEntries(Object.entries(externalConnectors).map(([k, ops]) => [k, Object.keys(ops)])),
+    syncs: Object.fromEntries(Object.entries(externalSyncs).map(([k, ops]) => [k, Object.keys(ops)])),
   },
-  apps: apps.map((a) => ({ slug: a.slug, name: a.name, permissions: Object.keys(a.permissions), actions: Object.keys(a.actions), blocks: [...new Set(a.pages.flatMap((p) => p.blocks.map((b) => b.type)))] })),
+  apps: apps.map((a) => ({ slug: a.slug, name: a.name, permissions: Object.keys(a.permissions), actions: Object.keys(a.actions), syncs: Object.keys(a.syncs), blocks: [...new Set(a.pages.flatMap((p) => p.blocks.map((b) => b.type)))] })),
 };
 
 const out = JSON.stringify(catalog, null, 2) + "\n";

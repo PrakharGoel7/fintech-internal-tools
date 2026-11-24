@@ -346,7 +346,7 @@
     },
     {
       "name": "review-queue",
-      "version": "2.0.2",
+      "version": "2.0.3",
       "category": "workflow",
       "summary": "Claimable work queue with SLA timers or hard-deadline countdowns, assignment, detail panel, decisions, comments and per-item audit history.",
       "useWhen": [
@@ -1238,7 +1238,7 @@
     },
     {
       "name": "audit-timeline",
-      "version": "1.0.1",
+      "version": "1.0.2",
       "category": "governance",
       "summary": "Read-only view of the tamper-evident audit log, scoped to the app or to one record.",
       "useWhen": [
@@ -1669,6 +1669,11 @@
       "kycVendor": [
         "rescreen"
       ]
+    },
+    "syncs": {
+      "stripe": [
+        "disputeStatuses"
+      ]
     }
   },
   "apps": [
@@ -1689,6 +1694,7 @@
         "escalate",
         "rescreen"
       ],
+      "syncs": [],
       "blocks": [
         "metric-cards",
         "review-queue",
@@ -1714,6 +1720,7 @@
         "issueRefund",
         "denyRefund"
       ],
+      "syncs": [],
       "blocks": [
         "metric-cards",
         "chart",
@@ -1739,6 +1746,7 @@
         "toggleProd",
         "createFlag"
       ],
+      "syncs": [],
       "blocks": [
         "toggle-matrix",
         "audit-timeline",
@@ -1764,6 +1772,7 @@
         "hold",
         "release"
       ],
+      "syncs": [],
       "blocks": [
         "metric-cards",
         "review-queue",
@@ -1790,6 +1799,9 @@
         "accept",
         "recordWon",
         "recordLost"
+      ],
+      "syncs": [
+        "stripeOutcomes"
       ],
       "blocks": [
         "metric-cards",

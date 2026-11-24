@@ -1,4 +1,4 @@
-import { listAudit, getUser } from "@/platform";
+import { listAudit, actorName } from "@/platform";
 import { VerifyChain } from "./VerifyChain";
 
 export default async function AuditPage({ searchParams }: { searchParams: Promise<Record<string, string>> }) {
@@ -29,7 +29,7 @@ export default async function AuditPage({ searchParams }: { searchParams: Promis
               <tr key={e.id} className="align-top transition-colors hover:bg-slate-50/80">
                 <td className="px-3 py-2 text-slate-400 tabular-nums">{e.id}</td>
                 <td className="whitespace-nowrap px-3 py-2 text-slate-600 tabular-nums">{new Date(e.ts).toLocaleString()}</td>
-                <td className="whitespace-nowrap px-3 py-2">{e.actor === "system" ? "system" : getUser(e.actor).name}</td>
+                <td className="whitespace-nowrap px-3 py-2">{actorName(e.actor)}</td>
                 <td className="px-3 py-2">{e.app ?? "—"}</td>
                 <td className="px-3 py-2"><span className="chip">{e.action}</span></td>
                 <td className="px-3 py-2 font-mono">{e.record_id ?? ""}</td>

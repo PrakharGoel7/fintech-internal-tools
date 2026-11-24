@@ -1,6 +1,6 @@
 import { manifests } from "@/blocks/manifests";
 import { sources } from "@/connectors";
-import { externalConnectors } from "@/connectors/external";
+import { externalConnectors, externalSyncs } from "@/connectors/external";
 import type { AppModule } from "./app-definition";
 import { ROLES } from "./users";
 
@@ -29,6 +29,19 @@ export function validateApp(app: AppModule): string[] {
     for (const f of a.notBy ?? []) if (sources[a.source] && !fields[f]) errs.push(`action ${id}: notBy references unknown field "${f}"`);
     for (const c of [...(a.availableWhen ?? []), ...(a.approval?.when ?? [])])
       if (sources[a.source] && !fields[c.field]) errs.push(`action ${id}: condition on unknown field "${c.field}"`);
+  }
+
+  for (const [id, s] of Object.entries(app.syncs)) {
+    if (!sources[s.source]) errs.push(`sync ${id}: unknown source "${s.source}"`);
+    else if (!sources[s.source].def.fields[s.field]) errs.push(`sync ${id}: unknown field "${s.field}"`);
+    if (!app.permissions[s.permission]) errs.push(`sync ${id}: permission "${s.permission}" not declared in app.permissions`);
+    if (!externalSyncs[s.connector]?.[s.op]) errs.push(`sync ${id}: unknown sync op ${s.connector}.${s.op}`);
+    for (const [value, actionId] of Object.entries(s.actions)) {
+      const a = app.actions[actionId];
+      if (!a) { errs.push(`sync ${id}: "${value}" maps to undefined action "${actionId}"`); continue; }
+      if (a.source !== s.source) errs.push(`sync ${id}: action ${actionId} is on source "${a.source}", not "${s.source}"`);
+      if (a.reasonCodes?.length || a.requireNote || a.approval) errs.push(`sync ${id}: action ${actionId} needs a reason code, note or approval, which a sync can't give`);
+    }
   }
 
   const seenPaths = new Set<string>();

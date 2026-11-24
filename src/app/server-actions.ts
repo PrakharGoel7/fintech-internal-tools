@@ -2,7 +2,7 @@
 import { cookies } from "next/headers";
 import { getCurrentUser } from "./session";
 import { getApp } from "@/apps/registry";
-import { runAction, decideApproval, revealPii, addComment, verifyAuditChain, audit, getUser } from "@/platform";
+import { runAction, runSync, decideApproval, revealPii, addComment, verifyAuditChain, audit, getUser } from "@/platform";
 import { submitAppRequest, decideSpec, shipRequest, type AppRequestInput } from "@/platform/requests";
 
 type Result = { ok: boolean; message: string; pending?: boolean; value?: string };
@@ -23,6 +23,16 @@ export async function runActionAction(args: {
     return res.status === "pending_approval"
       ? { ok: true, pending: true, message: `Sent for approval: ${res.rule}` }
       : { ok: true, message: `${label} done (${res.recordId})` };
+  } catch (e) { return fail(e); }
+}
+
+export async function runSyncAction(args: { appSlug: string; syncId: string }): Promise<Result> {
+  try {
+    const user = await getCurrentUser();
+    const app = getApp(args.appSlug);
+    const r = await runSync({ app, syncId: args.syncId, user });
+    const n = r.applied.length;
+    return { ok: true, message: `${app.syncs[args.syncId].label}: ${n} ${n === 1 ? "record" : "records"} updated${r.skipped.length ? `, ${r.skipped.length} skipped` : ""}` };
   } catch (e) { return fail(e); }
 }
 

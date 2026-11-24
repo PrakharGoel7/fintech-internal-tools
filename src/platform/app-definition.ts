@@ -43,6 +43,24 @@ export const actionSchema = z.object({
 });
 export type ActionDef = z.infer<typeof actionSchema>;
 
+/**
+ * Inbound sync from an external system: the connector's sync op reports each record's value of `field`
+ * (e.g. Stripe's dispute status); a changed value runs the mapped action through the normal pipeline,
+ * as the connector's service account. Mapped actions can't need reason codes, notes or approval.
+ */
+export const syncSchema = z.object({
+  label: z.string(),
+  source: z.string(),
+  connector: z.string(),
+  op: z.string(),
+  /** Who may run the sync by hand (scheduled runs need no user). */
+  permission: z.string(),
+  field: z.string(),
+  /** External value of `field` → action to run. Values with no entry are ignored. */
+  actions: z.record(z.string()),
+});
+export type SyncDef = z.infer<typeof syncSchema>;
+
 const blockInstanceSchema = z.object({
   type: z.string(),
   title: z.string().optional(),
@@ -71,6 +89,7 @@ export const appSchema = z.object({
   /** permission → roles. Must include "view". Conventional keys: view, export, pii.reveal, comment. */
   permissions: z.record(z.array(roleSchema)).refine((p) => "view" in p, "permissions.view is required"),
   actions: z.record(actionSchema).default({}),
+  syncs: z.record(syncSchema).default({}),
   pages: z.array(pageSchema).min(1),
 });
 export type AppDef = z.infer<typeof appSchema>;

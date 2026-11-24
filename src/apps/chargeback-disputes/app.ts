@@ -53,6 +53,12 @@ export default defineApp({
       availableWhen: [{ field: "status", op: "eq", value: "under_review" }],
     },
   },
+  syncs: {
+    stripeOutcomes: {
+      label: "Sync outcomes from Stripe", source: "disputes", connector: "stripe", op: "disputeStatuses", permission: "work",
+      field: "status", actions: { won: "recordWon", lost: "recordLost" },
+    },
+  },
   pages: [
     {
       id: "queue", title: "Queue", path: "",
