@@ -60,6 +60,8 @@ flowchart TB
 ```
 Reads are permission-checked and PII fields are masked unless a user with the right role reveals them, which is audited. The audit log is hash-chained, so tampering is detectable.
 
+Changes that come from outside systems use the same pipeline. An app `sync` (e.g. Stripe dispute outcomes) maps an external value to one of the app's actions. That action then runs as the connector's service account (`stripe-sync`), either from the app's sync button or on a schedule (`npm run sync`).
+
 ### 3. Blocks are versioned, with a dependency graph
 Every block has a version, and [`module-graph.json`](module-graph.json) records which apps use which block versions. CI fails any PR that changes a block without bumping its version, and lists the affected apps. A fix is made once in the block, not copied between apps.
 

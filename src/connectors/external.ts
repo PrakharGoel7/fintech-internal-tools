@@ -7,6 +7,11 @@ import type { Row } from "@/platform/db";
  */
 export type ConnectorOp = (record: Row | null, input: Row) => Row | Promise<Row>;
 
+/** One record's current values in the external system, keyed by the source's primary key. */
+export interface SyncUpdate { id: string; values: Row }
+/** Mocked inbound feed: receives the local records and returns what the external system reports for them. */
+export type SyncOp = (records: Row[]) => SyncUpdate[] | Promise<SyncUpdate[]>;
+
 const id = (prefix: string) => `${prefix}_${crypto.randomBytes(6).toString("hex")}`;
 
 export const externalConnectors: Record<string, Record<string, ConnectorOp>> = {
@@ -35,5 +40,18 @@ export const externalConnectors: Record<string, Record<string, ConnectorOp>> = {
       const score = Math.max(1, Math.min(99, Number(record.risk_score) + Math.round(Math.random() * 20 - 10)));
       return { risk_score: score, vendor_result: score > 70 ? "watchlist_hit" : score > 40 ? "needs_review" : "clear" };
     },
+  },
+};
+
+/** Deterministic mock ruling: about 60% of contested disputes are won. */
+const ruling = (disputeId: string) => (parseInt(crypto.createHash("sha256").update(disputeId).digest("hex").slice(0, 4), 16) % 100 < 60 ? "won" : "lost");
+
+export const externalSyncs: Record<string, Record<string, SyncOp>> = {
+  stripe: {
+    /** stripe.disputes.list() – Stripe's current status per dispute; here the issuer rules on every dispute with submitted evidence. */
+    disputeStatuses: (records) => records.map((r) => ({
+      id: String(r.id),
+      values: { status: r.status === "under_review" && r.evidence_submission_id ? ruling(String(r.id)) : r.status },
+    })),
   },
 };

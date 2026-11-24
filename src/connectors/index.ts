@@ -1,5 +1,6 @@
 import { TableSource, type SourceDef } from "./table-source";
-export { externalConnectors } from "./external";
+export { externalConnectors, externalSyncs } from "./external";
+export type { SyncUpdate } from "./external";
 export type { SourceDef, ListOptions, FieldDef, Tone } from "./table-source";
 export { TableSource };
 

@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { apps } from "@/apps/registry";
-import { can, type PageDef } from "@/platform";
+import { can, lastSyncs, type PageDef } from "@/platform";
 import { blocks } from "@/blocks/registry";
 import { getCurrentUser } from "@/app/session";
 import { AppIcon } from "@/components/AppIcon";
+import { SyncButton } from "@/components/SyncButton";
+import { relative } from "@/blocks/_shared/format";
 
 function matchPage(pages: PageDef[], segs: string[]) {
   for (const p of pages) {
@@ -31,6 +33,8 @@ export default async function AppPage({ params, searchParams }: { params: Promis
   if (!m) notFound();
   const basePath = `/apps/${app.slug}`;
   const pathname = `${basePath}${path.length ? "/" + path.join("/") : ""}`;
+  const lastRun = lastSyncs(app);
+  const syncs = Object.entries(app.syncs).filter(([, s]) => can(user, app, s.permission));
   return (
     <div>
       <div className="mb-5 flex flex-wrap items-center gap-4">
@@ -39,7 +43,12 @@ export default async function AppPage({ params, searchParams }: { params: Promis
           <h1 className="text-xl font-semibold tracking-tight">{app.name}</h1>
           <p className="mt-0.5 text-xs text-slate-500">{app.category}</p>
         </div>
-        <nav className="ml-auto flex gap-1 rounded-lg bg-slate-200/60 p-1 text-sm font-medium">
+        {syncs.length > 0 && (
+          <div className="ml-auto flex gap-2">
+            {syncs.map(([id, s]) => <SyncButton key={id} appSlug={app.slug} syncId={id} label={s.label} lastRun={lastRun[id] ? relative(lastRun[id]!) : null} />)}
+          </div>
+        )}
+        <nav className={`${syncs.length ? "" : "ml-auto "}flex gap-1 rounded-lg bg-slate-200/60 p-1 text-sm font-medium`}>
           {app.pages.filter((p) => p.nav && !p.path.includes(":")).map((p) => (
             <Link key={p.id} href={`${basePath}${p.path ? "/" + p.path : ""}`} className={`rounded-md px-3 py-1 transition-colors ${p.id === m.page.id ? "bg-white text-slate-900 shadow-sm" : "text-slate-500 hover:text-slate-900"}`}>{p.title}</Link>
           ))}

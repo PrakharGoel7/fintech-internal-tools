@@ -93,7 +93,7 @@ export function getDb(): DatabaseSync {
     const file = process.env.DB_PATH ?? path.join(process.cwd(), "data", "app.db");
     if (file !== ":memory:") fs.mkdirSync(path.dirname(file), { recursive: true });
     const db = new DatabaseSync(file);
-    db.exec("PRAGMA journal_mode = WAL;");
+    db.exec("PRAGMA journal_mode = WAL; PRAGMA busy_timeout = 5000;");
     db.exec(SCHEMA);
     migrate(db);
     for (const ddl of tableDdl) db.exec(ddl);

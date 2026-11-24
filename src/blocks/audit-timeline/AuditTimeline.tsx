@@ -1,5 +1,5 @@
 import type { z } from "zod";
-import { listAudit, getUser } from "@/platform";
+import { listAudit, actorName } from "@/platform";
 import type { BlockProps } from "../types";
 import type { configSchema } from "./manifest";
 import { relative } from "../_shared/format";
@@ -16,7 +16,7 @@ export function AuditTimeline({ config, ctx, title }: BlockProps<z.input<typeof 
             <span className="mt-1.5 h-2 w-2 flex-none rounded-full bg-brand-500 ring-4 ring-brand-50" />
             <div className="min-w-0">
               <div className="text-slate-800">
-                <b className="font-medium">{e.actor === "system" ? "System" : getUser(e.actor).name}</b>{" "}
+                <b className="font-medium">{actorName(e.actor)}</b>{" "}
                 <span className="chip">{e.action}</span>
                 {config.scope !== "record" && e.record_id && <span className="font-mono text-xs text-slate-400"> · {e.record_id}</span>}
               </div>

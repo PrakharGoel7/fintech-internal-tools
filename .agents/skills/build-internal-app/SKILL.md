@@ -58,7 +58,7 @@ The engineer's decision arrives as a message in this session (and a PR comment):
 ## Phase 2 — Build
 1. Create `src/apps/<slug>/app.ts` using `defineApp` (import only from `@/platform`).
 2. Register it in `src/apps/registry.ts`.
-3. New data: add source + table + seed data. External systems: add a mocked op in `src/connectors/external.ts`.
+3. New data: add source + table + seed data. External systems: add a mocked op in `src/connectors/external.ts`. When an external system changes records (e.g. Stripe rules on a dispute), add a mocked op to `externalSyncs` and declare a `syncs` entry mapping its values to actions; don't write them with seed data or a handler.
 4. App-local logic goes in `handlers`. Add a `GAPS.md` row for every handler / unmet need; if the same gap already has an entry, this is the 2nd app: build it as a shared module instead (step 6).
 5. The approved `scenarios.ts` is the acceptance test: `tests/scenarios.test.ts` runs every scenario and journey through the real platform. Add Vitest tests only for logic scenarios can't express (e.g. handler internals).
 6. When a gap is hit by a 2nd app, or is compliance-critical, build it as a shared module: an optional option on an existing block (bump minor), or a new block via the `create-block` skill. Migrate the first app's handler to it and mark the GAPS.md row resolved.

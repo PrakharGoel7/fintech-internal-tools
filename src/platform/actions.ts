@@ -1,12 +1,12 @@
 import crypto from "node:crypto";
 import { getDb, type Row } from "./db";
-import { audit } from "./audit";
+import { audit, listAudit } from "./audit";
 import { assertCan, ForbiddenError } from "./rbac";
 import { matches, describeConditions } from "./conditions";
 import { maskRow } from "./pii";
 import type { AppModule, ActionDef, Effect } from "./app-definition";
-import type { User } from "./users";
-import { getSource, externalConnectors } from "@/connectors";
+import { serviceAccount, type User } from "./users";
+import { getSource, externalConnectors, externalSyncs } from "@/connectors";
 
 class ActionError extends Error {
   constructor(msg: string) { super(msg); this.name = "ActionError"; }
@@ -92,18 +92,25 @@ function assertSeparated(action: ActionDef, record: Row | null, user: User) {
  * RBAC → reason code → availability guard → idempotency → maker-checker → segregation of duties → execute → audit.
  */
 export async function runAction(req: RunActionInput): Promise<ActionResult> {
+  const action = req.app.actions[req.actionId];
+  if (!action) throw new ActionError(`Unknown action ${req.actionId}`);
+  assertCan(req.user, req.app, action.permission);
+  return execute(req, action);
+}
+
+/** The pipeline after RBAC. Callers must have authorized `req.user` for the action. */
+async function execute(req: RunActionInput, action: ActionDef): Promise<ActionResult> {
   const { user, app, actionId } = req;
-  const action = app.actions[actionId];
-  if (!action) throw new ActionError(`Unknown action ${actionId}`);
-  assertCan(user, app, action.permission);
   if (action.reasonCodes?.length && !action.reasonCodes.includes(req.reason ?? "")) {
     throw new ActionError(`A reason code is required (${action.reasonCodes.join(", ")})`);
   }
   if (action.requireNote && !req.note?.trim()) throw new ActionError("A note is required");
 
   const db = getDb();
-  if (req.idempotencyKey) {
-    const prior = db.prepare("SELECT result FROM idempotency WHERE key = ?").get(req.idempotencyKey) as { result: string } | undefined;
+  // Scoped so one caller's key can't pre-empt another caller's (e.g. a user reserving a sync's key).
+  const idemKey = req.idempotencyKey && `${user.id}:${app.slug}:${actionId}:${req.idempotencyKey}`;
+  if (idemKey) {
+    const prior = db.prepare("SELECT result FROM idempotency WHERE key = ?").get(idemKey) as { result: string } | undefined;
     if (prior) return JSON.parse(prior.result);
   }
 
@@ -140,10 +147,60 @@ export async function runAction(req: RunActionInput): Promise<ActionResult> {
     });
     result = { status: "executed", recordId: out.recordId };
   }
-  if (req.idempotencyKey) {
-    db.prepare("INSERT INTO idempotency (key, ts, result) VALUES (?, ?, ?)").run(req.idempotencyKey, new Date().toISOString(), JSON.stringify(result));
+  if (idemKey) {
+    db.prepare("INSERT INTO idempotency (key, ts, result) VALUES (?, ?, ?)").run(idemKey, new Date().toISOString(), JSON.stringify(result));
   }
   return result;
+}
+
+export interface SyncResult {
+  applied: { recordId: string; action: string }[];
+  skipped: { recordId: string; why: string }[];
+}
+
+/**
+ * Pulls the external system's values for an app sync and runs the mapped action for every record whose value
+ * changed. Actions run through the pipeline (availability guard, idempotency, audit) as the connector's service
+ * account; the app config authorizes that account for exactly the mapped actions. `user` triggers a manual run
+ * and needs the sync's permission; omit it for scheduled runs.
+ */
+export async function runSync(opts: { app: AppModule; syncId: string; user?: User }): Promise<SyncResult> {
+  const { app, syncId, user } = opts;
+  const sync = app.syncs[syncId];
+  if (!sync) throw new ActionError(`Unknown sync ${syncId}`);
+  if (user) assertCan(user, app, sync.permission);
+  const op = externalSyncs[sync.connector]?.[sync.op];
+  if (!op) throw new ActionError(`Unknown sync op ${sync.connector}.${sync.op}`);
+  const source = getSource(sync.source);
+  const actor = serviceAccount(sync.connector);
+  const result: SyncResult = { applied: [], skipped: [] };
+  for (const { id, values } of await op(source.listRaw())) {
+    const record = source.getRaw(id);
+    const value = values[sync.field];
+    if (!record) { result.skipped.push({ recordId: id, why: "not found" }); continue; }
+    if (value === undefined || value === record[sync.field]) continue;
+    const actionId = sync.actions[String(value)];
+    if (!actionId) { result.skipped.push({ recordId: id, why: `no action for ${sync.field} "${value}"` }); continue; }
+    try {
+      await execute({
+        user: actor, app, actionId, recordId: id, idempotencyKey: `sync:${app.slug}:${syncId}:${id}:${value}`,
+        note: `${sync.label}: ${sync.connector} reports ${sync.field} "${value}"`,
+      }, app.actions[actionId]);
+      result.applied.push({ recordId: id, action: actionId });
+    } catch (e) {
+      result.skipped.push({ recordId: id, why: e instanceof Error ? e.message : String(e) });
+    }
+  }
+  audit({
+    actor: user?.id ?? "system", app: app.slug, action: `sync.${syncId}`, source: sync.source,
+    details: { label: sync.label, applied: result.applied.length, skipped: result.skipped.length },
+  });
+  return result;
+}
+
+/** When each of the app's syncs last ran (from the audit log). */
+export function lastSyncs(app: AppModule): Record<string, string | null> {
+  return Object.fromEntries(Object.keys(app.syncs).map((id) => [id, listAudit({ app: app.slug, action: `sync.${id}`, limit: 1 })[0]?.ts ?? null]));
 }
 
 export interface Approval {

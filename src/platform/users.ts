@@ -36,3 +36,15 @@ export const USERS: User[] = [
 export function getUser(id: string | undefined | null): User {
   return USERS.find((u) => u.id === id) ?? USERS[0];
 }
+
+/** The identity a connector's sync acts as (shown in the audit log). It has no roles and can't sign in. */
+export function serviceAccount(connector: string): User {
+  return { id: `${connector}-sync`, name: `${connector.charAt(0).toUpperCase()}${connector.slice(1)} sync`, title: "Integration", roles: [] };
+}
+
+/** Display name for an audit actor: a user, a connector's service account, or the system. */
+export function actorName(id: string): string {
+  if (id === "system") return "System";
+  const m = id.match(/^([a-z0-9]+)-sync$/i);
+  return USERS.find((u) => u.id === id)?.name ?? (m ? serviceAccount(m[1]).name : id);
+}
